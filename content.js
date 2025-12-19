@@ -1,0 +1,641 @@
+// ========================================
+// INICIALIZAÇÃO
+// ========================================
+console.log('🚀 WA Plus carregado!');
+
+// ========================================
+// VARIÁVEIS GLOBAIS
+// ========================================
+let buttonAdded = false;
+let panelOpen = false;
+let initAttempts = 0;
+const MAX_ATTEMPTS = 15;
+
+// ========================================
+// FUNÇÃO: Verificar se WhatsApp está pronto
+// ========================================
+function isWhatsAppReady() {
+    const checks = [
+        document.querySelector('[data-testid="chatlist-header"]'),
+        document.querySelector('header[data-testid="chatlist-header"]'),
+        document.querySelector('#pane-side')
+    ];
+    
+    return checks.some(check => check !== null);
+}
+
+// ========================================
+// FUNÇÃO: Adicionar tooltip customizado
+// ========================================
+function addCustomTooltip(button) {
+    const tooltip = document.createElement('div');
+    tooltip.id = 'waplus-tooltip';
+    tooltip.textContent = 'WaPlus';
+    tooltip.style.cssText = `
+        position: fixed;
+        visibility: hidden;
+        opacity: 0;
+        background: #233138;
+        color: #e9edef;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        white-space: nowrap;
+        z-index: 9999;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    `;
+    document.body.appendChild(tooltip);
+
+    let showTimeout, hideTimeout;
+
+    button.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+        showTimeout = setTimeout(() => {
+            const rect = button.getBoundingClientRect();
+            tooltip.style.top = `${rect.top + rect.height / 2 - 16}px`;
+            tooltip.style.left = `${rect.right + 4}px`;
+            tooltip.style.visibility = 'visible';
+            tooltip.style.opacity = '1';
+        }, 50);
+    });
+
+    button.addEventListener('mouseleave', () => {
+        clearTimeout(showTimeout);
+        hideTimeout = setTimeout(() => {
+            tooltip.style.opacity = '0';
+            setTimeout(() => tooltip.style.visibility = 'hidden', 50);
+        }, 0);
+    });
+}
+
+
+// ========================================
+// FUNÇÃO PRINCIPAL: Adicionar botão na barra lateral VERTICAL
+// ========================================
+function addButtonToSidebar() {
+    if (buttonAdded || document.getElementById('wa-plus-custom-btn')) {
+        return;
+    }
+
+    console.log('🔍 Procurando barra lateral vertical...');
+
+    // Encontrar a barra lateral vertical (onde ficam os ícones)
+    let sidebar = document.querySelector('div[data-tab-bar="side"]');
+    
+    // Estratégia 2: Encontrar pelo botão de Anunciar (megafone)
+    if (!sidebar) {
+        const announceButton = document.querySelector('button[aria-label*="Anunciar"]');
+        if (announceButton) {
+            sidebar = announceButton.parentElement.parentElement;
+            console.log('✅ Sidebar encontrada via botão Anunciar');
+        }
+    }
+    
+    // Estratégia 3: Pelo primeiro nav da sidebar
+    if (!sidebar) {
+        sidebar = document.querySelector('nav[role="navigation"]');
+    }
+
+    if (!sidebar) {
+        console.log('❌ Barra lateral não encontrada');
+        return;
+    }
+
+    console.log('✅ Barra lateral vertical encontrada!');
+
+    // Criar botão do zero
+    const button = document.createElement('button');
+    button.id = 'wa-plus-custom-btn';
+    button.setAttribute('aria-label', 'WA Plus');
+    button.title = 'WA Plus';
+    button.type = 'button';
+    
+    button.style.cssText = `
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 4px auto;
+        padding: 0;
+        transition: background-color 0.2s;
+        position: relative;
+    `;
+    
+    // Ícone SVG
+    button.innerHTML = `
+        <svg viewBox="0 0 24 24" width="24" height="24" style="color: #aebac1;">
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+    `;
+    
+    // Efeito hover
+    button.addEventListener('mouseenter', () => {
+        button.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+    });
+    
+    button.addEventListener('mouseleave', () => {
+        button.style.backgroundColor = 'transparent';
+    });
+    
+    // Evento de clique
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🚀 Botão WA Plus clicado!');
+        toggleWaPlusPanel();
+    });
+    
+    // Adicionar ao final da sidebar vertical
+    sidebar.appendChild(button);
+    
+    buttonAdded = true;
+    console.log('✅ Botão WA Plus adicionado na barra lateral vertical!');
+}
+
+
+// ========================================
+// FUNÇÃO: Criar botão clonado
+// ========================================
+function createClonedButton(sourceButton, container) {
+    const clonedButton = sourceButton.cloneNode(true);
+    
+    clonedButton.id = 'wa-plus-custom-btn';
+    clonedButton.removeAttribute('data-tab');
+    clonedButton.removeAttribute('aria-selected');
+    clonedButton.setAttribute('aria-label', 'WaPlus');
+    clonedButton.setAttribute('title', 'WaPlus');
+    
+    const svgContainer = clonedButton.querySelector('svg')?.parentElement;
+    if (svgContainer) {
+        svgContainer.innerHTML = `
+            <svg viewBox="0 0 24 24" width="24" height="24">
+                <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+        `;
+    }
+    
+    const newButton = clonedButton.cloneNode(true);
+    newButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWaPlusPanel();
+    });
+    
+    container.insertBefore(newButton, container.firstChild);
+    buttonAdded = true;
+    
+    console.log('✅ Botão WaPlus adicionado!');
+    addCustomTooltip(newButton);
+}
+
+// ========================================
+// FUNÇÃO: Criar botão customizado (fallback)
+// ========================================
+function createCustomButton(container) {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'padding: 10px 0; display: flex; justify-content: center;';
+    
+    const button = document.createElement('button');
+    button.id = 'wa-plus-custom-btn';
+    button.setAttribute('aria-label', 'WaPlus');
+    button.style.cssText = `
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #aebac1;
+        transition: background-color 0.2s;
+    `;
+    
+    button.innerHTML = `
+        <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+        </svg>
+    `;
+    
+    button.addEventListener('click', toggleWaPlusPanel);
+    
+    wrapper.appendChild(button);
+    container.insertBefore(wrapper, container.firstChild);
+    buttonAdded = true;
+    
+    console.log('✅ Botão WaPlus adicionado!');
+    addCustomTooltip(button);
+}
+
+// ========================================
+// PAINEL LATERAL: Toggle/Abrir/Fechar
+// ========================================
+function toggleWaPlusPanel() {
+    if (panelOpen) {
+        closeWaPlusPanel();
+    } else {
+        openWaPlusPanel();
+    }
+}
+
+function openWaPlusPanel() {
+    const existingPanel = document.getElementById('waplus-panel');
+    if (existingPanel) {
+        existingPanel.remove();
+    }
+
+    const panel = document.createElement('div');
+    panel.id = 'waplus-panel';
+    panel.innerHTML = `
+        <div class="waplus-header">
+            <div class="waplus-logo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M16.3392 14.3581C16.3392 14.3581 15.1145 12.855 14.8155 12.4925ZM16.3392 14.3581C16.3392 14.3581 15.4105 13.221 14.8155 12.4925ZM16.3392 14.3581C16.4326 14.4701 16.4691 14.4969 16.4942 14.3387L18.5672 5.96615C18.6241 5.69894 18.5802 5.76379 18.3476 5.87578L7.93727 10.8593C7.68412 10.9801 7.61702 10.9948 7.92436 10.9948L10.8369 10.9943C10.8369 10.9943 11.1135 10.9981 11.1017 11.0013C10.5076 11.6339 8.29892 14.1063 6.23243 15.6749C4.06247 17.3662 2.60942 17.9536 1.54393 18.3603C1.2597 18.4595 1.17578 18.2893 1.17578 18.0763C1.17578 14.6705 1.17581 9.35517 1.17581 9.35517C1.17581 6.47899 3.54282 4.01662 6.44554 4.01662C6.44554 4.01662 16.6879 4.01663 16.7331 4.01663C16.8687 4.01663 16.8558 4.12547 16.8106 4.17801C16.7989 4.19157 15.7696 5.38517 15.7696 5.38517C15.7271 5.43246 15.698 5.4585 15.7773 5.42625C15.7773 5.42625 22.2919 2.38486 22.358 2.35767C22.5582 2.27529 22.8359 2.35772 22.8101 2.69992C22.5194 4.21695 21.9641 7.14746 21.9641 7.14746C21.9641 7.14746 21.7252 8.41917 21.7252 9.34874C21.7252 9.34874 21.7573 11.7892 21.7252 13.1122C21.6606 15.7717 19.4519 18.0828 16.7137 18.1538H8.47982C8.47982 18.1538 3.47486 21.4847 3.28112 21.6138C3.1455 21.7171 2.84197 21.659 2.90655 21.3233C3.10672 20.495 3.51354 18.8135 3.53937 18.7154C3.57166 18.5927 3.67499 18.341 3.92039 18.3087C8.3827 17.2656 11.0869 15.4421 14.6569 12.4925C14.743 12.4213 14.7367 12.3968 14.8155 12.4925" fill="currentColor"/>
+                </svg>
+                <span>WA Web Plus</span>
+            </div>
+            <button class="waplus-close">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor" d="M19.1 4.9C18.7 4.5 18.1 4.5 17.7 4.9L12 10.6L6.3 4.9C5.9 4.5 5.3 4.5 4.9 4.9C4.5 5.3 4.5 5.9 4.9 6.3L10.6 12L4.9 17.7C4.5 18.1 4.5 18.7 4.9 19.1C5.3 19.5 5.9 19.5 6.3 19.1L12 13.4L17.7 19.1C18.1 19.5 18.7 19.5 19.1 19.1C19.5 18.7 19.5 18.1 19.1 17.7L13.4 12L19.1 6.3C19.5 5.9 19.5 5.3 19.1 4.9Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="waplus-tabs">
+            <button class="waplus-tab active" data-tab="melhorias">Melhorias</button>
+            <button class="waplus-tab" data-tab="ferramentas">Ferramentas Business</button>
+            <button class="waplus-tab" data-tab="exportar">Exportar</button>
+            <button class="waplus-tab" data-tab="estatisticas">Estatísticas</button>
+        </div>
+
+        <div class="waplus-content">
+            <div class="waplus-tab-content active" data-content="melhorias">
+                <h3>Privacidade</h3>
+                
+                <div class="waplus-option-row">
+                    <label class="waplus-option">
+                        <input type="checkbox" id="desfocar-mensagens">
+                        <span>Desfocar mensagens recentes</span>
+                    </label>
+                    <button class="waplus-adjust-btn" data-target="blur-mensagens-intensity">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="waplus-slider-popup" id="popup-blur-mensagens-intensity" style="display: none;">
+                    <input type="range" id="blur-mensagens-intensity" min="0" max="20" value="5" step="1">
+                    <span class="waplus-slider-value">5px</span>
+                </div>
+                
+                <div class="waplus-option-row">
+                    <label class="waplus-option">
+                        <input type="checkbox" id="desfocar-nomes">
+                        <span>Desfocar nomes dos contatos</span>
+                    </label>
+                    <button class="waplus-adjust-btn" data-target="blur-nomes-intensity">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="waplus-slider-popup" id="popup-blur-nomes-intensity" style="display: none;">
+                    <input type="range" id="blur-nomes-intensity" min="0" max="20" value="5" step="1">
+                    <span class="waplus-slider-value">5px</span>
+                </div>
+                
+                <div class="waplus-option-row">
+                    <label class="waplus-option">
+                        <input type="checkbox" id="desfocar-fotos">
+                        <span>Desfocar fotos dos contatos</span>
+                    </label>
+                    <button class="waplus-adjust-btn" data-target="blur-fotos-intensity">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="waplus-slider-popup" id="popup-blur-fotos-intensity" style="display: none;">
+                    <input type="range" id="blur-fotos-intensity" min="0" max="30" value="10" step="1">
+                    <span class="waplus-slider-value">10px</span>
+                </div>
+            </div>
+
+            <div class="waplus-tab-content" data-content="ferramentas">
+                <h3>Em Breve</h3>
+                <p>Ferramentas Business em desenvolvimento...</p>
+            </div>
+
+            <div class="waplus-tab-content" data-content="exportar">
+                <h3>Em Breve</h3>
+                <p>Funcionalidades de exportação em desenvolvimento...</p>
+            </div>
+
+            <div class="waplus-tab-content" data-content="estatisticas">
+                <h3>Em Breve</h3>
+                <p>Estatísticas em desenvolvimento...</p>
+            </div>
+        </div>
+
+        <div class="waplus-footer">
+            <span>Victor - JZ Viagens 5566990740008</span>
+        </div>
+    `;
+
+    document.body.appendChild(panel);
+    panelOpen = true;
+
+    // Event Listeners
+    setupPanelEvents(panel);
+    loadSavedSettings(panel);
+}
+
+function closeWaPlusPanel() {
+    const panel = document.getElementById('waplus-panel');
+    if (panel) {
+        panel.remove();
+        panelOpen = false;
+    }
+}
+
+// ========================================
+// FUNÇÃO: Configurar eventos do painel
+// ========================================
+function setupPanelEvents(panel) {
+    // Botão fechar
+    panel.querySelector('.waplus-close').addEventListener('click', closeWaPlusPanel);
+
+    // Tabs
+    const tabs = panel.querySelectorAll('.waplus-tab');
+    const contents = panel.querySelectorAll('.waplus-tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            panel.querySelector(`[data-content="${targetTab}"]`).classList.add('active');
+        });
+    });
+
+    // Botões de ajuste
+    const adjustButtons = panel.querySelectorAll('.waplus-adjust-btn');
+    adjustButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const targetId = btn.getAttribute('data-target');
+            const popup = panel.querySelector(`#popup-${targetId}`);
+            
+            panel.querySelectorAll('.waplus-slider-popup').forEach(p => {
+                if (p !== popup) p.style.display = 'none';
+            });
+            
+            popup.style.display = popup.style.display === 'none' ? 'flex' : 'none';
+        });
+    });
+
+    // Fechar sliders ao clicar fora
+    panel.addEventListener('click', (e) => {
+        if (!e.target.closest('.waplus-adjust-btn') && !e.target.closest('.waplus-slider-popup')) {
+            panel.querySelectorAll('.waplus-slider-popup').forEach(p => p.style.display = 'none');
+        }
+    });
+
+    // Blur Mensagens
+    setupBlurControls(panel, 'desfocar-mensagens', 'blur-mensagens-intensity', toggleBlurMessages);
+    
+    // Blur Nomes
+    setupBlurControls(panel, 'desfocar-nomes', 'blur-nomes-intensity', toggleBlurNames);
+    
+    // Blur Fotos
+    setupBlurControls(panel, 'desfocar-fotos', 'blur-fotos-intensity', toggleBlurPhotos);
+}
+
+// ========================================
+// FUNÇÃO: Configurar controles de blur
+// ========================================
+function setupBlurControls(panel, checkboxId, sliderId, toggleFunction) {
+    const checkbox = panel.querySelector(`#${checkboxId}`);
+    const slider = panel.querySelector(`#${sliderId}`);
+    const valueDisplay = slider.nextElementSibling;
+
+    checkbox.addEventListener('change', (e) => {
+        toggleFunction(e.target.checked, parseInt(slider.value));
+    });
+
+    slider.addEventListener('input', (e) => {
+        valueDisplay.textContent = `${e.target.value}px`;
+        if (checkbox.checked) {
+            toggleFunction(true, parseInt(e.target.value));
+        }
+    });
+}
+
+// ========================================
+// FUNÇÃO: Carregar configurações salvas
+// ========================================
+function loadSavedSettings(panel) {
+    chrome.storage.sync.get([
+        'blurMessages', 'blurMessagesIntensity',
+        'blurNames', 'blurNamesIntensity',
+        'blurPhotos', 'blurPhotosIntensity'
+    ], (data) => {
+        if (data.blurMessages) {
+            const checkbox = panel.querySelector('#desfocar-mensagens');
+            const slider = panel.querySelector('#blur-mensagens-intensity');
+            const intensity = data.blurMessagesIntensity || 5;
+            checkbox.checked = true;
+            slider.value = intensity;
+            slider.nextElementSibling.textContent = `${intensity}px`;
+            toggleBlurMessages(true, intensity);
+        }
+        if (data.blurNames) {
+            const checkbox = panel.querySelector('#desfocar-nomes');
+            const slider = panel.querySelector('#blur-nomes-intensity');
+            const intensity = data.blurNamesIntensity || 5;
+            checkbox.checked = true;
+            slider.value = intensity;
+            slider.nextElementSibling.textContent = `${intensity}px`;
+            toggleBlurNames(true, intensity);
+        }
+        if (data.blurPhotos) {
+            const checkbox = panel.querySelector('#desfocar-fotos');
+            const slider = panel.querySelector('#blur-fotos-intensity');
+            const intensity = data.blurPhotosIntensity || 10;
+            checkbox.checked = true;
+            slider.value = intensity;
+            slider.nextElementSibling.textContent = `${intensity}px`;
+            toggleBlurPhotos(true, intensity);
+        }
+    });
+}
+
+// ========================================
+// FUNCIONALIDADES: Blur Mensagens
+// ========================================
+function toggleBlurMessages(enabled, intensity = 5) {
+    const styleId = 'waplus-blur-messages';
+    
+    if (enabled) {
+        const existingStyle = document.getElementById(styleId);
+        if (existingStyle) existingStyle.remove();
+        
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            div._ak8k {
+                filter: blur(${intensity}px) !important;
+                transition: filter 0.2s ease;
+            }
+            div[role="gridcell"]:hover div._ak8k {
+                filter: blur(0px) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    } else {
+        const style = document.getElementById(styleId);
+        if (style) style.remove();
+    }
+    
+    chrome.storage.sync.set({ blurMessages: enabled, blurMessagesIntensity: intensity });
+}
+
+// ========================================
+// FUNCIONALIDADES: Blur Nomes
+// ========================================
+function toggleBlurNames(enabled, intensity = 5) {
+    const styleId = 'waplus-blur-names';
+    
+    if (enabled) {
+        const existingStyle = document.getElementById(styleId);
+        if (existingStyle) existingStyle.remove();
+        
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            div._ak8q {
+                filter: blur(${intensity}px) !important;
+                transition: filter 0.2s ease;
+            }
+            div[role="gridcell"]:hover div._ak8q {
+                filter: blur(0px) !important;
+            }
+        `;
+        document.head.appendChild(style);
+    } else {
+        const style = document.getElementById(styleId);
+        if (style) style.remove();
+    }
+    
+    chrome.storage.sync.set({ blurNames: enabled, blurNamesIntensity: intensity });
+}
+
+// ========================================
+// FUNCIONALIDADES: Blur Fotos
+// ========================================
+function toggleBlurPhotos(enabled, intensity = 10) {
+    const styleId = 'waplus-blur-photos';
+    
+    if (enabled) {
+        const existingStyle = document.getElementById(styleId);
+        if (existingStyle) existingStyle.remove();
+        
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            div._ak8h {
+                filter: blur(${intensity}px) !important;
+                transition: filter 0.2s ease;
+            }
+            div[role="gridcell"]:hover div._ak8h {
+                filter: blur(0px) !important;
+            }
+            img.xh8yej3[alt]:not([src*="cdn.whatsapp.net"]) {
+                filter: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+    } else {
+        const style = document.getElementById(styleId);
+        if (style) style.remove();
+    }
+    
+    chrome.storage.sync.set({ blurPhotos: enabled, blurPhotosIntensity: intensity });
+}
+
+// ========================================
+// EVENTOS GLOBAIS
+// ========================================
+
+// Fechar painel ao clicar em uma conversa
+function setupChatClickClose() {
+    const chatList = document.querySelector('div[role="grid"]');
+    if (chatList) {
+        chatList.addEventListener('click', closeWaPlusPanel, { capture: true });
+    }
+}
+
+// Fechar painel com ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeWaPlusPanel();
+});
+
+// Fechar painel ao clicar fora
+document.addEventListener('click', (e) => {
+    const panel = document.getElementById('waplus-panel');
+    const button = document.getElementById('wa-plus-custom-btn');
+    if (!panel) return;
+
+    const clickedInsidePanel = panel.contains(e.target);
+    const clickedOnButton = button && button.contains(e.target);
+
+    if (!clickedInsidePanel && !clickedOnButton) {
+        closeWaPlusPanel();
+    }
+}, true);
+
+// ========================================
+// INICIALIZAÇÃO
+// ========================================
+function initWaPlus() {
+    initAttempts++;
+    
+    if (isWhatsAppReady()) {
+        console.log('✅ WhatsApp pronto! Adicionando botão...');
+        addButtonToSidebar();
+        setupChatClickClose();
+        
+        // Observer para re-adicionar botão se sumir
+        const observer = new MutationObserver(() => {
+            if (!document.getElementById('wa-plus-custom-btn')) {
+                buttonAdded = false;
+                addButtonToSidebar();
+            }
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+        
+    } else if (initAttempts < MAX_ATTEMPTS) {
+        setTimeout(initWaPlus, 1000);
+    } else {
+        console.error('❌ WhatsApp não carregou');
+    }
+}
+
+// Inicia
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWaPlus);
+} else {
+    initWaPlus();
+}
