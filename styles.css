@@ -21,17 +21,37 @@
    PAINEL LATERAL - VERSÃO AJUSTÁVEL
    ======================================== */
 #waplus-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 700px;              /* ← AJUSTE A LARGURA AQUI */
-  height: 100vh;
-  background: #111b21;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 420px;            /* largura inicial */
+    max-width: 80vw;
+    min-width: 510px;
+    height: 100vh;
+    background: #111b21;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
 }
+
+/* Alça de resize na borda esquerda */
+#waplus-panel-resizer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    cursor: ew-resize;
+    z-index: 10001;
+    background: transparent;
+}
+
+#waplus-panel-resizer:hover {
+    background: rgba(0, 168, 132, 0.3);
+}
+
 
 
 /* ========================================
@@ -302,4 +322,52 @@
   color: #8696a0;
   min-width: 35px;
   text-align: right;
+}
+
+#waplus-floating-badge {
+    position: absolute;
+    top: 40px;
+    right: 12px;
+    z-index: 2;
+    cursor: pointer;
+}
+
+.waplus-badge {
+    display: inline-flex;               /* Deixa os itens na horizontal e centralizados verticalmente */
+    align-items: center;                /* Alinha logo e textos pelo centro vertical */
+    gap: 4px;                           /* Espaço horizontal entre logo, texto e versão */
+    padding: 4px 8px;                   /* Altura (2px) e largura (8px) interna do “pill”; aumenta/diminui o tamanho geral */
+    border-radius: 999px;               /* Deixa o fundo totalmente arredondado (pill) */
+    background: #ffffff;              /* Cor de fundo do badge */
+    color: #111b21;                   /* Cor padrão do texto dentro do badge */
+    font-size: 10px;                    /* Tamanho da fonte de texto e versão; aumente para ficar mais legível, diminua para compactar */
+    font-weight: 500;                   /* Espessura do texto; 400 = normal, 500 = semi‑negrito */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25); /* Sombra do badge; pode reduzir o blur (6) ou a opacidade (0.25) para ficar mais discreta */
+}
+
+.waplus-badge-logo {
+    display: flex;                      /* Mantém o SVG alinhado ao centro */
+    align-items: center;
+    justify-content: center;
+    /* background: #00a884;             REMOVIDO: tira o círculo verde de fundo */
+    /* border-radius: 999px;            REMOVIDO: não queremos mais a bolinha */
+    width: 16px;                        /* Largura da área da logo; ajuste se quiser menor/maior */
+    height: 16px;                       /* Altura da área da logo */
+    margin-right: 2px;                  /* Espaço pequeno entre ícone e texto */
+}
+
+.waplus-badge-logo svg {
+    width: 16px;                        /* Tamanho visual do ícone */
+    height: 16px;
+    fill: #00a884;                    /* Cor verde do ícone; mude aqui se quiser outro tom */
+}
+
+
+.waplus-badge-text {
+    font-weight: 500;                   /* Espessura do texto “WA Web Plus”; mude para 400 se quiser mais fino */
+}
+
+.waplus-badge-version {
+    color: #00a884;                     /* Cor do número da versão; pode trocar para outra cor de destaque */
+    font-weight: 600;                   /* Espessura do número da versão (um pouco mais forte que o texto) */
 }

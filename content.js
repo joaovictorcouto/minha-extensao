@@ -252,19 +252,7 @@ function openWaPlusPanel() {
         const panel = document.createElement('div');
         panel.id = 'waplus-panel';
         panel.innerHTML = `
-            <div class="waplus-header">
-                <div class="waplus-logo">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M16.3392 14.3581C16.3392 14.3581 15.1145 12.855 14.8155 12.4925ZM16.3392 14.3581C16.3392 14.3581 15.4105 13.221 14.8155 12.4925ZM16.3392 14.3581C16.4326 14.4701 16.4691 14.4969 16.4942 14.3387L18.5672 5.96615C18.6241 5.69894 18.5802 5.76379 18.3476 5.87578L7.93727 10.8593C7.68412 10.9801 7.61702 10.9948 7.92436 10.9948L10.8369 10.9943C10.8369 10.9943 11.1135 10.9981 11.1017 11.0013C10.5076 11.6339 8.29892 14.1063 6.23243 15.6749C4.06247 17.3662 2.60942 17.9536 1.54393 18.3603C1.2597 18.4595 1.17578 18.2893 1.17578 18.0763C1.17578 14.6705 1.17581 9.35517 1.17581 9.35517C1.17581 6.47899 3.54282 4.01662 6.44554 4.01662C6.44554 4.01662 16.6879 4.01663 16.7331 4.01663C16.8687 4.01663 16.8558 4.12547 16.8106 4.17801C16.7989 4.19157 15.7696 5.38517 15.7696 5.38517C15.7271 5.43246 15.698 5.4585 15.7773 5.42625C15.7773 5.42625 22.2919 2.38486 22.358 2.35767C22.5582 2.27529 22.8359 2.35772 22.8101 2.69992C22.5194 4.21695 21.9641 7.14746 21.9641 7.14746C21.9641 7.14746 21.7252 8.41917 21.7252 9.34874C21.7252 9.34874 21.7573 11.7892 21.7252 13.1122C21.6606 15.7717 19.4519 18.0828 16.7137 18.1538H8.47982C8.47982 18.1538 3.47486 21.4847 3.28112 21.6138C3.1455 21.7171 2.84197 21.659 2.90655 21.3233C3.10672 20.495 3.51354 18.8135 3.53937 18.7154C3.57166 18.5927 3.67499 18.341 3.92039 18.3087C8.3827 17.2656 11.0869 15.4421 14.6569 12.4925C14.743 12.4213 14.7367 12.3968 14.8155 12.4925" fill="currentColor"/>
-                    </svg>
-                    <span>WA Web Plus</span>
-                </div>
-                <button class="waplus-close">
-                    <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="currentColor" d="M19.1 4.9C18.7 4.5 18.1 4.5 17.7 4.9L12 10.6L6.3 4.9C5.9 4.5 5.3 4.5 4.9 4.9C4.5 5.3 4.5 5.9 4.9 6.3L10.6 12L4.9 17.7C4.5 18.1 4.5 18.7 4.9 19.1C5.3 19.5 5.9 19.5 6.3 19.1L12 13.4L17.7 19.1C18.1 19.5 18.7 19.5 19.1 19.1C19.5 18.7 19.5 18.1 19.1 17.7L13.4 12L19.1 6.3C19.5 5.9 19.5 5.3 19.1 4.9Z"/>
-                    </svg>
-                </button>
-            </div>
+            <div id="waplus-panel-resizer"></div>
 
             <div class="waplus-tabs">
                 <button class="waplus-tab active" data-tab="melhorias">Melhorias</button>
@@ -367,11 +355,39 @@ function openWaPlusPanel() {
             </div>
         `;
 
+        // Cria o badge flutuante no topo direito
+        const badge = document.createElement('div');
+        const manifest = chrome.runtime.getManifest();
+        const extensionVersion = manifest.version || '1.0.0';
+        badge.id = 'waplus-floating-badge';
+        badge.innerHTML = `
+            <div class="waplus-badge">
+                <span class="waplus-badge-logo">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16.3392 14.3581C16.3392 14.3581 15.1145 12.855 14.8155 12.4925ZM16.3392 14.3581C16.3392 14.3581 15.4105 13.221 14.8155 12.4925ZM16.3392 14.3581C16.4326 14.4701 16.4691 14.4969 16.4942 14.3387L18.5672 5.96615C18.6241 5.69894 18.5802 5.76379 18.3476 5.87578L7.93727 10.8593C7.68412 10.9801 7.61702 10.9948 7.92436 10.9948L10.8369 10.9943C10.8369 10.9943 11.1135 10.9981 11.1017 11.0013C10.5076 11.6339 8.29892 14.1063 6.23243 15.6749C4.06247 17.3662 2.60942 17.9536 1.54393 18.3603C1.2597 18.4595 1.17578 18.2893 1.17578 18.0763C1.17578 14.6705 1.17581 9.35517 1.17581 9.35517C1.17581 6.47899 3.54282 4.01662 6.44554 4.01662C6.44554 4.01662 16.6879 4.01663 16.7331 4.01663C16.8687 4.01663 16.8558 4.12547 16.8106 4.17801C16.7989 4.19157 15.7696 5.38517 15.7696 5.38517C15.7271 5.43246 15.698 5.4585 15.7773 5.42625C15.7773 5.42625 22.2919 2.38486 22.358 2.35767C22.5582 2.27529 22.8359 2.35772 22.8101 2.69992C22.5194 4.21695 21.9641 7.14746 21.9641 7.14746C21.9641 7.14746 21.7252 8.41917 21.7252 9.34874C21.7252 9.34874 21.7573 11.7892 21.7252 13.1122C21.6606 15.7717 19.4519 18.0828 16.7137 18.1538H8.47982C8.47982 18.1538 3.47486 21.4847 3.28112 21.6138C3.1455 21.7171 2.84197 21.659 2.90655 21.3233C3.10672 20.495 3.51354 18.8135 3.53937 18.7154C3.57166 18.5927 3.67499 18.341 3.92039 18.3087C8.3827 17.2656 11.0869 15.4421 14.6569 12.4925C14.743 12.4213 14.7367 12.3968 14.8155 12.4925" fill="#00a884"/>
+                    </svg>
+                </span>
+                <span class="waplus-badge-text">WA Plus</span>
+                <span class="waplus-badge-version">${extensionVersion}</span>
+            </div>
+        `;
+        badge.addEventListener('click', closeWaPlusPanel);
+
+        panel.appendChild(badge);
+        
+        // Restaurar largura salva, se existir
+        chrome.storage.sync.get(['panelWidth'], (data) => {
+            if (data.panelWidth) {
+                panel.style.width = data.panelWidth + 'px';
+            }
+        });
+
         document.body.appendChild(panel);
         panelOpen = true;
 
         setupPanelEvents(panel);
-        
+        setupPanelResizer(panel);
+
         // ✅ Aplicar os blurs SE estiverem ativados
         if (mensagensChecked) toggleBlurMessages(true, mensagensValue);
         if (nomesChecked) toggleBlurNames(true, nomesValue);
@@ -391,11 +407,48 @@ function closeWaPlusPanel() {
 
 
 // ========================================
+// RESIZE LATERAL DO PAINEL
+// ========================================
+function setupPanelResizer(panel) {
+    const resizer = panel.querySelector('#waplus-panel-resizer');
+    if (!resizer) return;
+
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isResizing = true;
+        document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+
+        const viewportWidth = window.innerWidth;
+        const newWidth = viewportWidth - e.clientX; // distância até a direita
+
+        const min = 510;
+        const max = viewportWidth * 0.8;
+
+        const clamped = Math.min(Math.max(newWidth, min), max);
+        panel.style.width = clamped + 'px';
+
+        // opcional: salvar largura
+        chrome.storage.sync.set({ panelWidth: clamped });
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isResizing) return;
+        isResizing = false;
+        document.body.style.userSelect = '';
+    });
+}
+
+
+// ========================================
 // FUNÇÃO: Configurar eventos do painel
 // ========================================
 function setupPanelEvents(panel) {
-    panel.querySelector('.waplus-close').addEventListener('click', closeWaPlusPanel);
-
     const tabs = panel.querySelectorAll('.waplus-tab');
     const contents = panel.querySelectorAll('.waplus-tab-content');
 
@@ -446,14 +499,61 @@ function setupBlurControls(panel, checkboxId, sliderId, toggleFunction) {
     const slider = panel.querySelector(`#${sliderId}`);
     const valueDisplay = slider.nextElementSibling;
 
+    // Mapa: id do checkbox -> chaves no storage
+    const map = {
+        'desfocar-mensagens': {
+            flag: 'blurMessages',
+            intensity: 'blurMessagesIntensity',
+            defaultIntensity: 5
+        },
+        'desfocar-nomes': {
+            flag: 'blurNames',
+            intensity: 'blurNamesIntensity',
+            defaultIntensity: 5
+        },
+        'desfocar-fotos': {
+            flag: 'blurPhotos',
+            intensity: 'blurPhotosIntensity',
+            defaultIntensity: 10
+        },
+        'desfocar-mensagens-conversa': {
+            flag: 'blurConversa',
+            intensity: 'blurConversaIntensity',
+            defaultIntensity: 5
+        }
+    };
+
+    const cfg = map[checkboxId];
+
+    // 🔁 Carrega estado salvo e ajusta UI
+    if (cfg) {
+        chrome.storage.sync.get([cfg.flag, cfg.intensity], (data) => {
+            const enabled = !!data[cfg.flag];
+            const intensity = data[cfg.intensity] ?? cfg.defaultIntensity;
+
+            checkbox.checked = enabled;
+            slider.value = intensity;
+            valueDisplay.textContent = `${intensity}px`;
+
+            // Garante que o efeito esteja aplicado se estava ligado
+            if (enabled) {
+                toggleFunction(true, intensity);
+            }
+        });
+    }
+
+    // 🔂 Eventos do usuário
     checkbox.addEventListener('change', (e) => {
-        toggleFunction(e.target.checked, parseInt(slider.value));
+        const checked = e.target.checked;
+        const value = parseInt(slider.value, 10);
+        toggleFunction(checked, value);
     });
 
     slider.addEventListener('input', (e) => {
-        valueDisplay.textContent = `${e.target.value}px`;
+        const val = parseInt(e.target.value, 10);
+        valueDisplay.textContent = `${val}px`;
         if (checkbox.checked) {
-            toggleFunction(true, parseInt(e.target.value));
+            toggleFunction(true, val);
         }
     });
 }
