@@ -241,18 +241,6 @@
   color: #d1d7db;
 }
 
-.waplus-main-arrow {
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid #8696a0;
-  transition: transform 0.2s ease;
-}
-
-.waplus-main-label.open .waplus-main-arrow {
-  transform: rotate(180deg);
-}
 
 /* CONTAINER DAS SUB-OPÇÕES */
 #waplus-blur-suboptions {

@@ -267,37 +267,37 @@ function openWaPlusPanel() {
             <div class="waplus-tab-content active" data-content="melhorias">
                 <h3>Privacidade</h3>
                 
-                <!-- CHECKBOX PRINCIPAL -->
+                <!-- CHECKBOX PRINCIPAL (SEM SETINHA) -->
                 <div class="waplus-option-row">
                 <div class="waplus-option-main">
                     <input type="checkbox" id="desfoque-personalizado" ${data.desfoquePersonalizado ? 'checked' : ''}>
-                    <button type="button" class="waplus-main-label">
+                    <label for="desfoque-personalizado" class="waplus-main-label-static">
                     <span>Desfoque personalizado</span>
-                    <span class="waplus-main-arrow"></span>
-                    </button>
+                    </label>
                 </div>
                 </div>
-                
-                <!-- SUB-OPÇÕES COM SLIDERS AO LADO -->
-                <div id="waplus-blur-suboptions" style="display: none; padding-left: 28px;">
-                <!-- 1. Mensagens recentes -->
+
+                <!-- SUB-OPÇÕES SEMPRE VISÍVEIS (SEM display: none) -->
+                <div id="waplus-blur-suboptions" style="padding-left: 28px;">
+                <!-- 1. Fotos dos contatos -->
                 <div class="waplus-suboption-row">
                     <label class="waplus-suboption">
                     <span class="waplus-suboption-left">
                         <label class="waplus-toggle">
-                        <input type="checkbox" id="desfocar-mensagens" ${mensagensChecked ? 'checked' : ''}>
+                        <input type="checkbox" id="desfocar-fotos" ${fotosChecked ? 'checked' : ''}>
                         <span class="waplus-toggle-slider"></span>
                         </label>
-                        <span class="waplus-suboption-title">Mensagens recentes</span>
+                        <span class="waplus-suboption-title">Fotos dos contatos</span>
                     </span>
 
                     <div class="waplus-compact-slider">
-                        <input type="range" id="blur-mensagens-intensity" min="0" max="20" value="${mensagensValue}" step="1">
-                        <span class="waplus-slider-value">${mensagensValue}px</span>
+                        <input type="range" id="blur-fotos-intensity" min="0" max="20" value="${fotosValue}" step="1">
+                        <span class="waplus-slider-value">${fotosValue}px</span>
                     </div>
                     </label>
                 </div>
-
+                
+                
                 <!-- 2. Nomes dos contatos -->
                 <div class="waplus-suboption-row">
                     <label class="waplus-suboption">
@@ -316,23 +316,25 @@ function openWaPlusPanel() {
                     </label>
                 </div>
 
-                <!-- 3. Fotos dos contatos -->
+                
+                <!-- 3. Mensagens recentes -->
                 <div class="waplus-suboption-row">
                     <label class="waplus-suboption">
                     <span class="waplus-suboption-left">
                         <label class="waplus-toggle">
-                        <input type="checkbox" id="desfocar-fotos" ${fotosChecked ? 'checked' : ''}>
+                        <input type="checkbox" id="desfocar-mensagens" ${mensagensChecked ? 'checked' : ''}>
                         <span class="waplus-toggle-slider"></span>
                         </label>
-                        <span class="waplus-suboption-title">Fotos dos contatos</span>
+                        <span class="waplus-suboption-title">Mensagens recentes</span>
                     </span>
 
                     <div class="waplus-compact-slider">
-                        <input type="range" id="blur-fotos-intensity" min="0" max="30" value="${fotosValue}" step="1">
-                        <span class="waplus-slider-value">${fotosValue}px</span>
+                        <input type="range" id="blur-mensagens-intensity" min="0" max="20" value="${mensagensValue}" step="1">
+                        <span class="waplus-slider-value">${mensagensValue}px</span>
                     </div>
                     </label>
                 </div>
+
 
                 <!-- 4. Mensagens na conversa -->
                 <div class="waplus-suboption-row">
@@ -352,6 +354,7 @@ function openWaPlusPanel() {
                     </label>
                 </div>
                 </div>
+
 
 
             </div>
@@ -485,31 +488,21 @@ function setupPanelEvents(panel) {
 function setupDesfoquePersonalizado(panel) {
   const mainCheckbox = panel.querySelector('#desfoque-personalizado');
   const suboptions   = panel.querySelector('#waplus-blur-suboptions');
-  const mainLabel    = panel.querySelector('.waplus-main-label');
 
-  if (!mainCheckbox || !suboptions || !mainLabel) return;
+  if (!mainCheckbox || !suboptions) return;
 
   // Quando a principal muda, só liga/desliga os estilos, sem mexer nos switches
-    mainCheckbox.addEventListener('change', (e) => {
+  mainCheckbox.addEventListener('change', (e) => {
     const checked = e.target.checked;
     chrome.storage.sync.set({ desfoquePersonalizado: checked });
 
-    // <<< NOVO: marca o painel como principal ON/OFF
+    // Marca o painel como principal ON/OFF
     const panelRoot = mainCheckbox.closest('#waplus-panel');
     if (panelRoot) {
-        panelRoot.classList.toggle('waplus-main-off', !checked);
+      panelRoot.classList.toggle('waplus-main-off', !checked);
     }
 
     aplicarBlursConformeEstado(panel, checked);
-    });
-
-
-  // Clique no NOME/SETINHA → abre/fecha grupo
-  mainLabel.addEventListener('click', () => {
-    const isVisible = suboptions.style.display !== 'none';
-    const show      = !isVisible;
-    suboptions.style.display = show ? 'block' : 'none';
-    mainLabel.classList.toggle('open', show);
   });
 
   // Estado inicial
@@ -517,14 +510,11 @@ function setupDesfoquePersonalizado(panel) {
     const checked = !!data.desfoquePersonalizado;
     mainCheckbox.checked = checked;
 
-    // <<< NOVO: aplica a classe correta ao carregar
+    // Aplica a classe correta ao carregar
     const panelRoot = mainCheckbox.closest('#waplus-panel');
     if (panelRoot) {
-        panelRoot.classList.toggle('waplus-main-off', !checked);
+      panelRoot.classList.toggle('waplus-main-off', !checked);
     }
-
-    suboptions.style.display = checked ? 'block' : 'none';
-    mainLabel.classList.toggle('open', checked);
 
     // Ao abrir o painel, garante que os blurs reflitam
     aplicarBlursConformeEstado(panel, checked);
