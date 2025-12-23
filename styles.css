@@ -2,85 +2,79 @@
    TOOLTIP CUSTOMIZADO
    ======================================== */
 #waplus-tooltip {
-  /* Aparência */
   background-color: #EAEAEA;
-  /* Cor de fundo - AJUSTE AQUI */
   color: #1a1a1a;
-  /* Cor do texto - AJUSTE AQUI */
   padding: 6px 10px;
-  /* Espaçamento interno - AJUSTE AQUI */
   border-radius: 5px;
-  /* Bordas arredondadas */
   font-weight: 400;
-  /* Peso da fonte */
   white-space: nowrap;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
 
 /* ========================================
    PAINEL LATERAL - VERSÃO AJUSTÁVEL
    ======================================== */
 #waplus-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 420px;            /* largura inicial */
-    max-width: 80vw;
-    min-width: 510px;
-    height: 100vh;
-    background: #111b21;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;          /* largura inicial */
+  max-width: 80vw;
+  min-width: 420px;      /* igual à inicial */
+  height: 100vh;
+  background: #111b21;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
 
 /* Alça de resize na borda esquerda */
 #waplus-panel-resizer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    cursor: ew-resize;
-    z-index: 10001;
-    background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 10001;
+  background: transparent;
 }
 
 #waplus-panel-resizer:hover {
-    background: rgba(0, 168, 132, 0.3);
+  background: rgba(0, 168, 132, 0.3);
 }
 
 
-
 /* ========================================
-   OTIMIZAÇÃO - Compactar painel para caber tudo
+   OTIMIZAÇÃO - Compactar painel
    ======================================== */
 
-/* Header - Reduzir altura */
+/* Header */
 .waplus-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 15px; /* Era 20px */
+  padding: 12px 15px;
   border-bottom: 1px solid #2a3942;
 }
 
 .waplus-logo {
   display: flex;
   align-items: center;
-  gap: 8px; /* Era 10px */
+  gap: 8px;
 }
 
 .waplus-logo svg {
   fill: #00a884;
-  width: 18px; /* Era 20px */
+  width: 18px;
   height: 18px;
 }
 
 .waplus-logo span {
-  font-size: 15px; /* Era 18px */
+  font-size: 15px;
   font-weight: 600;
   color: #00a884;
 }
@@ -90,7 +84,7 @@
   border: none;
   color: #8696a0;
   cursor: pointer;
-  padding: 6px; /* Era 8px */
+  padding: 6px;
   border-radius: 50%;
   transition: background 0.2s;
 }
@@ -99,7 +93,7 @@
   background: #2a3942;
 }
 
-/* Abas - Reduzir altura */
+/* Abas */
 .waplus-tabs {
   display: flex;
   border-bottom: 2px solid #00a884;
@@ -108,12 +102,12 @@
 
 .waplus-tab {
   flex: 1;
-  padding: 10px 8px; /* Era 15px 10px */
+  padding: 10px 8px;
   background: none;
   border: none;
   color: #8696a0;
   cursor: pointer;
-  font-size: 11px; /* Era 13px */
+  font-size: 11px;
   font-weight: 600;
   transition: all 0.2s;
   border-bottom: 3px solid transparent;
@@ -128,11 +122,11 @@
   border-bottom-color: #00a884;
 }
 
-/* Conteúdo - Remover padding excessivo */
+/* Conteúdo */
 .waplus-content {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 15px; /* Era 20px */
+  padding: 12px 15px;
 }
 
 .waplus-tab-content {
@@ -145,10 +139,10 @@
 
 .waplus-tab-content h3 {
   color: #e9edef;
-  font-size: 13px; /* Era 16px */
-  margin: 10px 0 8px 0; /* Era 20px 0 15px 0 */
+  font-size: 13px;
+  margin: 10px 0 8px 0;
   font-weight: 500;
-  padding-bottom: 4px; /* Era 8px */
+  padding-bottom: 4px;
   border-bottom: 1px solid #2a3942;
 }
 
@@ -156,46 +150,46 @@
   margin-top: 0;
 }
 
-/* Opções (checkboxes) - Compactar ao máximo */
+/* Opções simples (checkbox) */
 .waplus-option {
   display: flex;
   align-items: center;
-  gap: 10px; /* Era 12px */
-  padding: 6px 0; /* Era 12px 0 */
+  gap: 10px;
+  padding: 6px 0;
   color: #d1d7db;
   cursor: pointer;
   user-select: none;
 }
 
 .waplus-option input[type="checkbox"] {
-  width: 16px; /* Era 18px */
+  width: 16px;
   height: 16px;
   cursor: pointer;
   accent-color: #00a884;
-  flex-shrink: 0; /* Evita que o checkbox encolha */
+  flex-shrink: 0;
 }
 
 .waplus-option span {
-  font-size: 12px; /* Era 14px */
-  line-height: 1.3; /* Compacta altura das linhas */
+  font-size: 12px;
+  line-height: 1.3;
 }
 
 .waplus-option:hover {
   color: #e9edef;
 }
 
-/* Footer - Reduzir altura */
+/* Footer */
 .waplus-footer {
-  padding: 10px 15px; /* Era 15px 20px */
+  padding: 10px 15px;
   border-top: 1px solid #2a3942;
   text-align: center;
   color: #8696a0;
-  font-size: 10px; /* Era 12px */
+  font-size: 10px;
 }
 
-/* Scrollbar customizada */
+/* Scrollbar */
 .waplus-content::-webkit-scrollbar {
-  width: 5px; /* Era 6px */
+  width: 5px;
 }
 
 .waplus-content::-webkit-scrollbar-track {
@@ -211,8 +205,9 @@
   background: #374045;
 }
 
+
 /* ========================================
-   OPÇÃO COM BOTÃO DE AJUSTE
+   OPÇÃO PRINCIPAL "Desfoque personalizado"
    ======================================== */
 
 .waplus-option-row {
@@ -228,21 +223,22 @@
   margin: 0;
 }
 
-/* CHECKBOX PRINCIPAL - "Desfoque personalizado" */
 .waplus-option-main {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #d1d7db;
+  gap: 8px;
 }
 
 .waplus-main-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: #d1d7db;
 }
 
 .waplus-main-arrow {
@@ -258,7 +254,6 @@
   transform: rotate(180deg);
 }
 
-
 /* CONTAINER DAS SUB-OPÇÕES */
 #waplus-blur-suboptions {
   animation: slideDown 0.3s ease;
@@ -266,33 +261,23 @@
   margin-top: 8px;
 }
 
-/* LINHA DE CADA SUB-OPÇÃO + SLIDER */
-.waplus-suboption-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 0;
-  margin-bottom: 4px;
+/* Animação */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.waplus-suboption {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  font-size: 12px;
-  color: #d1d7db;
-}
 
-.waplus-suboption input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #00a884;
-  cursor: pointer;
-}
+/* ========================================
+   SLIDERS COMPACTOS
+   ======================================== */
 
-/* SLIDER COMPACTO AO LADO DO TEXTO */
 .waplus-compact-slider {
   display: flex;
   align-items: center;
@@ -327,32 +312,9 @@
   font-family: inherit;
 }
 
-.waplus-adjust-btn {
-  background: none;
-  border: none;
-  color: #8696a0;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 50%;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.waplus-adjust-btn:hover {
-  background: #2a3942;
-  color: #00a884;
-}
-
-.waplus-adjust-btn svg {
-  width: 16px;
-  height: 16px;
-}
 
 /* ========================================
-   POPUP DO SLIDER (aparece ao clicar no botão)
+   POPUP DO SLIDER (se usar)
    ======================================== */
 
 .waplus-slider-popup {
@@ -364,17 +326,6 @@
   background: #2a3942;
   border-radius: 8px;
   animation: slideDown 0.2s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .waplus-slider-popup input[type="range"] {
@@ -416,57 +367,190 @@
   background: #06cf9c;
 }
 
-.waplus-slider-value {
+.waplus-slider-popup .waplus-slider-value {
   font-size: 11px;
   color: #8696a0;
   min-width: 35px;
   text-align: right;
 }
 
+
+/* ========================================
+   BADGE FLOUTANTE
+   ======================================== */
+
 #waplus-floating-badge {
-    position: absolute;
-    top: 40px;
-    right: 12px;
-    z-index: 2;
-    cursor: pointer;
+  position: absolute;
+  top: 40px;
+  right: 12px;
+  z-index: 2;
+  cursor: pointer;
 }
 
 .waplus-badge {
-    display: inline-flex;               /* Deixa os itens na horizontal e centralizados verticalmente */
-    align-items: center;                /* Alinha logo e textos pelo centro vertical */
-    gap: 4px;                           /* Espaço horizontal entre logo, texto e versão */
-    padding: 4px 8px;                   /* Altura (2px) e largura (8px) interna do “pill”; aumenta/diminui o tamanho geral */
-    border-radius: 999px;               /* Deixa o fundo totalmente arredondado (pill) */
-    background: #ffffff;              /* Cor de fundo do badge */
-    color: #111b21;                   /* Cor padrão do texto dentro do badge */
-    font-size: 10px;                    /* Tamanho da fonte de texto e versão; aumente para ficar mais legível, diminua para compactar */
-    font-weight: 500;                   /* Espessura do texto; 400 = normal, 500 = semi‑negrito */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.25); /* Sombra do badge; pode reduzir o blur (6) ou a opacidade (0.25) para ficar mais discreta */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111b21;
+  font-size: 10px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
 }
 
 .waplus-badge-logo {
-    display: flex;                      /* Mantém o SVG alinhado ao centro */
-    align-items: center;
-    justify-content: center;
-    /* background: #00a884;             REMOVIDO: tira o círculo verde de fundo */
-    /* border-radius: 999px;            REMOVIDO: não queremos mais a bolinha */
-    width: 16px;                        /* Largura da área da logo; ajuste se quiser menor/maior */
-    height: 16px;                       /* Altura da área da logo */
-    margin-right: 2px;                  /* Espaço pequeno entre ícone e texto */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 2px;
 }
 
 .waplus-badge-logo svg {
-    width: 16px;                        /* Tamanho visual do ícone */
-    height: 16px;
-    fill: #00a884;                    /* Cor verde do ícone; mude aqui se quiser outro tom */
+  width: 16px;
+  height: 16px;
+  fill: #00a884;
 }
 
-
 .waplus-badge-text {
-    font-weight: 500;                   /* Espessura do texto “WA Web Plus”; mude para 400 se quiser mais fino */
+  font-weight: 500;
 }
 
 .waplus-badge-version {
-    color: #00a884;                     /* Cor do número da versão; pode trocar para outra cor de destaque */
-    font-weight: 600;                   /* Espessura do número da versão (um pouco mais forte que o texto) */
+  color: #00a884;
+  font-weight: 600;
+}
+
+
+/* ========================================
+   SWITCH + TEXTO + SLIDER (subopções)
+   ======================================== */
+
+/* Linha de cada subopção */
+.waplus-suboption-row {
+  padding: 4px 0;
+  margin-bottom: 2px;
+}
+
+/* Container geral da linha */
+.waplus-suboption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* esquerda (switch+texto) x direita (slider) */
+  gap: 8px;
+  width: 100%;
+  font-size: 12px;
+  color: #d1d7db;
+}
+
+/* Switch + texto colados à esquerda */
+.waplus-suboption-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Container da chave */
+.waplus-toggle {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+
+/* Esconde o checkbox nativo */
+.waplus-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Trilho */
+.waplus-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #3b4a54;   /* OFF */
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+/* Bolinha */
+.waplus-toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  top: 2px;
+  background-color: #e9edef;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+/* ON */
+.waplus-toggle input:checked + .waplus-toggle-slider {
+  background-color: #00a884;
+}
+
+.waplus-toggle input:checked + .waplus-toggle-slider::before {
+  transform: translateX(14px);
+}
+
+/* Slider curto à direita (override do padrão) */
+.waplus-compact-slider {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 110px;
+  max-width: 150px;
+}
+
+.waplus-compact-slider input[type="range"] {
+  flex: 1;
+  height: 4px;      /* mais fino */
+  background: #1f2c33;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.waplus-compact-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;      /* bolinha menor */
+  height: 10px;
+  background: #00a884;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.waplus-compact-slider .waplus-slider-value {
+  font-size: 10px;
+  color: #8696a0;
+  min-width: 26px;
+  text-align: right;
+}
+
+
+/* Quando a função principal está OFF, deixamos os switches "apagados" */
+#waplus-panel.waplus-main-off .waplus-toggle-slider {
+  background-color: #2a3942;      /* trilho mais escuro */
+}
+
+#waplus-panel.waplus-main-off .waplus-toggle-slider::before {
+  background-color: #8796a0;      /* bolinha cinza */
+}
+
+#waplus-panel.waplus-main-off .waplus-suboption-title {
+  color: #8696a0;                 /* texto mais apagado */
+}
+
+/* Opcional: impedir clique nas sub-opções quando a principal está OFF */
+#waplus-panel.waplus-main-off .waplus-suboption {
+  pointer-events: none;
+  opacity: 0.7;
 }

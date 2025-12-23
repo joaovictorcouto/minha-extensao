@@ -269,62 +269,91 @@ function openWaPlusPanel() {
                 
                 <!-- CHECKBOX PRINCIPAL -->
                 <div class="waplus-option-row">
-                <label class="waplus-option-main">
+                <div class="waplus-option-main">
                     <input type="checkbox" id="desfoque-personalizado" ${data.desfoquePersonalizado ? 'checked' : ''}>
-                    <span class="waplus-main-label">
+                    <button type="button" class="waplus-main-label">
                     <span>Desfoque personalizado</span>
                     <span class="waplus-main-arrow"></span>
-                    </span>
-                </label>
+                    </button>
                 </div>
-
+                </div>
                 
                 <!-- SUB-OPÇÕES COM SLIDERS AO LADO -->
                 <div id="waplus-blur-suboptions" style="display: none; padding-left: 28px;">
-                    <div class="waplus-suboption-row">
-                        <label class="waplus-suboption">
-                            <input type="checkbox" id="desfocar-mensagens" ${mensagensChecked ? 'checked' : ''}>
-                            <span>Mensagens recentes</span>
+                <!-- 1. Mensagens recentes -->
+                <div class="waplus-suboption-row">
+                    <label class="waplus-suboption">
+                    <span class="waplus-suboption-left">
+                        <label class="waplus-toggle">
+                        <input type="checkbox" id="desfocar-mensagens" ${mensagensChecked ? 'checked' : ''}>
+                        <span class="waplus-toggle-slider"></span>
                         </label>
-                        <div class="waplus-compact-slider">
-                            <input type="range" id="blur-mensagens-intensity" min="0" max="20" value="${mensagensValue}" step="1">
-                            <span class="waplus-slider-value">${mensagensValue}px</span>
-                        </div>
+                        <span class="waplus-suboption-title">Mensagens recentes</span>
+                    </span>
+
+                    <div class="waplus-compact-slider">
+                        <input type="range" id="blur-mensagens-intensity" min="0" max="20" value="${mensagensValue}" step="1">
+                        <span class="waplus-slider-value">${mensagensValue}px</span>
                     </div>
-                    
-                    <div class="waplus-suboption-row">
-                        <label class="waplus-suboption">
-                            <input type="checkbox" id="desfocar-nomes" ${nomesChecked ? 'checked' : ''}>
-                            <span>Nomes dos contatos</span>
-                        </label>
-                        <div class="waplus-compact-slider">
-                            <input type="range" id="blur-nomes-intensity" min="0" max="20" value="${nomesValue}" step="1">
-                            <span class="waplus-slider-value">${nomesValue}px</span>
-                        </div>
-                    </div>
-                    
-                    <div class="waplus-suboption-row">
-                        <label class="waplus-suboption">
-                            <input type="checkbox" id="desfocar-fotos" ${fotosChecked ? 'checked' : ''}>
-                            <span>Fotos dos contatos</span>
-                        </label>
-                        <div class="waplus-compact-slider">
-                            <input type="range" id="blur-fotos-intensity" min="0" max="30" value="${fotosValue}" step="1">
-                            <span class="waplus-slider-value">${fotosValue}px</span>
-                        </div>
-                    </div>
-                    
-                    <div class="waplus-suboption-row">
-                        <label class="waplus-suboption">
-                            <input type="checkbox" id="desfocar-mensagens-conversa" ${conversaChecked ? 'checked' : ''}>
-                            <span>Mensagens na conversa</span>
-                        </label>
-                        <div class="waplus-compact-slider">
-                            <input type="range" id="blur-conversa-intensity" min="0" max="20" value="${conversaValue}" step="1">
-                            <span class="waplus-slider-value">${conversaValue}px</span>
-                        </div>
-                    </div>
+                    </label>
                 </div>
+
+                <!-- 2. Nomes dos contatos -->
+                <div class="waplus-suboption-row">
+                    <label class="waplus-suboption">
+                    <span class="waplus-suboption-left">
+                        <label class="waplus-toggle">
+                        <input type="checkbox" id="desfocar-nomes" ${nomesChecked ? 'checked' : ''}>
+                        <span class="waplus-toggle-slider"></span>
+                        </label>
+                        <span class="waplus-suboption-title">Nomes dos contatos</span>
+                    </span>
+
+                    <div class="waplus-compact-slider">
+                        <input type="range" id="blur-nomes-intensity" min="0" max="20" value="${nomesValue}" step="1">
+                        <span class="waplus-slider-value">${nomesValue}px</span>
+                    </div>
+                    </label>
+                </div>
+
+                <!-- 3. Fotos dos contatos -->
+                <div class="waplus-suboption-row">
+                    <label class="waplus-suboption">
+                    <span class="waplus-suboption-left">
+                        <label class="waplus-toggle">
+                        <input type="checkbox" id="desfocar-fotos" ${fotosChecked ? 'checked' : ''}>
+                        <span class="waplus-toggle-slider"></span>
+                        </label>
+                        <span class="waplus-suboption-title">Fotos dos contatos</span>
+                    </span>
+
+                    <div class="waplus-compact-slider">
+                        <input type="range" id="blur-fotos-intensity" min="0" max="30" value="${fotosValue}" step="1">
+                        <span class="waplus-slider-value">${fotosValue}px</span>
+                    </div>
+                    </label>
+                </div>
+
+                <!-- 4. Mensagens na conversa -->
+                <div class="waplus-suboption-row">
+                    <label class="waplus-suboption">
+                    <span class="waplus-suboption-left">
+                        <label class="waplus-toggle">
+                        <input type="checkbox" id="desfocar-mensagens-conversa" ${conversaChecked ? 'checked' : ''}>
+                        <span class="waplus-toggle-slider"></span>
+                        </label>
+                        <span class="waplus-suboption-title">Mensagens na conversa</span>
+                    </span>
+
+                    <div class="waplus-compact-slider">
+                        <input type="range" id="blur-conversa-intensity" min="0" max="20" value="${conversaValue}" step="1">
+                        <span class="waplus-slider-value">${conversaValue}px</span>
+                    </div>
+                    </label>
+                </div>
+                </div>
+
+
             </div>
 
             <div class="waplus-tab-content" data-content="ferramentas">
@@ -460,35 +489,45 @@ function setupDesfoquePersonalizado(panel) {
 
   if (!mainCheckbox || !suboptions || !mainLabel) return;
 
-  const blurFunctions = {
-    'desfocar-mensagens':          (enabled, intensity) => toggleBlurMessages(enabled, intensity),
-    'desfocar-nomes':              (enabled, intensity) => toggleBlurNames(enabled, intensity),
-    'desfocar-fotos':              (enabled, intensity) => toggleBlurPhotos(enabled, intensity),
-    'desfocar-mensagens-conversa': (enabled, intensity) => toggleBlurConversa(enabled, intensity)
-  };
-
-  mainCheckbox.addEventListener('change', (e) => {
+  // Quando a principal muda, só liga/desliga os estilos, sem mexer nos switches
+    mainCheckbox.addEventListener('change', (e) => {
     const checked = e.target.checked;
-    suboptions.style.display = checked ? 'block' : 'none';
-    mainLabel.classList.toggle('open', checked);   // ← gira a setinha
+    chrome.storage.sync.set({ desfoquePersonalizado: checked });
 
-    const subCheckboxes = suboptions.querySelectorAll('input[type="checkbox"]');
-    subCheckboxes.forEach(cb => {
-      cb.checked = checked;
-      const row    = cb.closest('.waplus-suboption-row');
-      const slider = row ? row.querySelector('input[type="range"]') : null;
-      const fn     = blurFunctions[cb.id];
-      if (fn && slider) fn(checked, parseInt(slider.value, 10));
+    // <<< NOVO: marca o painel como principal ON/OFF
+    const panelRoot = mainCheckbox.closest('#waplus-panel');
+    if (panelRoot) {
+        panelRoot.classList.toggle('waplus-main-off', !checked);
+    }
+
+    aplicarBlursConformeEstado(panel, checked);
     });
 
-    chrome.storage.sync.set({ desfoquePersonalizado: checked });
+
+  // Clique no NOME/SETINHA → abre/fecha grupo
+  mainLabel.addEventListener('click', () => {
+    const isVisible = suboptions.style.display !== 'none';
+    const show      = !isVisible;
+    suboptions.style.display = show ? 'block' : 'none';
+    mainLabel.classList.toggle('open', show);
   });
 
+  // Estado inicial
   chrome.storage.sync.get('desfoquePersonalizado', (data) => {
     const checked = !!data.desfoquePersonalizado;
     mainCheckbox.checked = checked;
+
+    // <<< NOVO: aplica a classe correta ao carregar
+    const panelRoot = mainCheckbox.closest('#waplus-panel');
+    if (panelRoot) {
+        panelRoot.classList.toggle('waplus-main-off', !checked);
+    }
+
     suboptions.style.display = checked ? 'block' : 'none';
-    mainLabel.classList.toggle('open', checked);   // estado inicial
+    mainLabel.classList.toggle('open', checked);
+
+    // Ao abrir o painel, garante que os blurs reflitam
+    aplicarBlursConformeEstado(panel, checked);
   });
 }
 
@@ -532,7 +571,6 @@ function setupBlurControls(panel, checkboxId, sliderId, toggleFunction) {
     const enabled   = !!data[cfg.flag];
     const intensity = data[cfg.intensity] ?? cfg.defaultIntensity;
 
-    // Apenas sincroniza a UI; CSS já foi aplicado pelo bloco global
     checkbox.checked = enabled;
     slider.value     = intensity;
     valueDisplay.textContent = `${intensity}px`;
@@ -541,6 +579,26 @@ function setupBlurControls(panel, checkboxId, sliderId, toggleFunction) {
   checkbox.addEventListener('change', (e) => {
     const checked = e.target.checked;
     const value   = parseInt(slider.value, 10);
+
+    // Se ligou QUALQUER subopção, ativa a principal
+    if (checked) {
+      const mainCheckbox = panel.querySelector('#desfoque-personalizado');
+      if (mainCheckbox && !mainCheckbox.checked) {
+        mainCheckbox.checked = true;
+        chrome.storage.sync.set({ desfoquePersonalizado: true });
+      }
+    } else {
+      // Opcional: se todas subopções estiverem OFF, desliga a principal
+      const mainCheckbox = panel.querySelector('#desfoque-personalizado');
+      if (mainCheckbox) {
+        const anyOn = panel.querySelector('#waplus-blur-suboptions input[type="checkbox"]:checked');
+        if (!anyOn) {
+          mainCheckbox.checked = false;
+          chrome.storage.sync.set({ desfoquePersonalizado: false });
+        }
+      }
+    }
+
     toggleFunction(checked, value);
   });
 
@@ -550,6 +608,33 @@ function setupBlurControls(panel, checkboxId, sliderId, toggleFunction) {
     if (checkbox.checked) {
       toggleFunction(true, val);
     }
+  });
+}
+
+
+function aplicarBlursConformeEstado(panel, principalAtiva) {
+  // Mapeia id do switch → função de blur
+  const blurMap = {
+    'desfocar-mensagens':          toggleBlurMessages,
+    'desfocar-nomes':              toggleBlurNames,
+    'desfocar-fotos':              toggleBlurPhotos,
+    'desfocar-mensagens-conversa': toggleBlurConversa
+  };
+
+  Object.entries(blurMap).forEach(([id, fn]) => {
+    const checkbox = panel.querySelector('#' + id);
+    if (!checkbox) return;
+
+    const row    = checkbox.closest('.waplus-suboption-row');
+    const slider = row ? row.querySelector('input[type="range"]') : null;
+    if (!slider) return;
+
+    const intensidade = parseInt(slider.value, 10);
+
+    // Se a principal estiver ativa, aplica blur conforme o switch da sub-opção.
+    // Se a principal estiver desativada, força todos para false (sem blur).
+    const deveAtivar = principalAtiva && checkbox.checked;
+    fn(deveAtivar, intensidade);
   });
 }
 
@@ -696,11 +781,17 @@ function toggleBlurConversa(enabled, intensity = 5) {
 // APLICAR BLURS AUTOMATICAMENTE AO CARREGAR
 // ========================================
 chrome.storage.sync.get([
+  'desfoquePersonalizado',
   'blurMessages', 'blurMessagesIntensity',
   'blurNames', 'blurNamesIntensity',
   'blurPhotos', 'blurPhotosIntensity',
   'blurConversa', 'blurConversaIntensity'
 ], (data) => {
+  const personalizadoOn = !!data.desfoquePersonalizado;
+
+  // Se o usuário desligou o Desfoque personalizado, NÃO aplica nenhum blur ao carregar
+  if (!personalizadoOn) return;
+
   if (data.blurMessages) {
     toggleBlurMessages(true, data.blurMessagesIntensity || 5);
   }
@@ -714,6 +805,7 @@ chrome.storage.sync.get([
     toggleBlurConversa(true, data.blurConversaIntensity || 5);
   }
 });
+
 
 
 // ========================================
