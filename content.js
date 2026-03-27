@@ -259,8 +259,8 @@ function openWaPlusPanel() {
         <div id="waplus-panel-resizer"></div>
         <div class="waplus-tabs">
             <button class="waplus-tab active" data-tab="melhorias">Melhorias</button>
-            <button class="waplus-tab" data-tab="ferramentas">Ferramentas Business</button>
-            <button class="waplus-tab" data-tab="exportar">Exportar</button>
+            <button class="waplus-tab" data-tab="mensagens">Mensagens</button>
+            <button class="waplus-tab" data-tab="exportacao">Exportação</button>
             <button class="waplus-tab" data-tab="estatisticas">Estatísticas</button>
         </div>
         <div class="waplus-content">
@@ -353,15 +353,48 @@ function openWaPlusPanel() {
                     </div>
                     </label>
                 </div>
-                </div>
-
-
 
             </div>
 
-            <div class="waplus-tab-content" data-content="ferramentas">
-                <h3>Em Breve</h3>
-                <p>Ferramentas Business em desenvolvimento...</p>
+            <div class="waplus-tab-content" data-content="mensagens">
+                <h3 style="margin-top: 5px;">Agendar Nova Mensagem</h3>
+                
+                <div class="waplus-schedule-container">
+                    <div class="waplus-input-group">
+                        <label for="waplus-schedule-contact">Número do Whatsapp (com DDD):</label>
+                        <input type="text" id="waplus-schedule-contact" placeholder="Ex: 5511999999999">
+                    </div>
+                    
+                    <div class="waplus-input-group">
+                        <label for="waplus-schedule-text">Mensagem:</label>
+                        <textarea id="waplus-schedule-text" rows="3" placeholder="Sua mensagem..."></textarea>
+                    </div>
+                    
+                    <div class="waplus-input-group">
+                        <label for="waplus-schedule-time">Data e Hora:</label>
+                        <input type="datetime-local" id="waplus-schedule-time">
+                    </div>
+                    
+                    <button id="waplus-schedule-btn" class="waplus-btn-primary">Agendar Mensagem</button>
+                    <div id="waplus-schedule-status" class="waplus-status-msg"></div>
+                </div>
+
+                <!-- GERENCIADOR DE MENSAGENS -->
+                <div class="waplus-msg-manager" style="margin-top: 20px;">
+                    <div class="waplus-msg-tabs">
+                        <button class="waplus-msg-tab active" data-target="scheduled">Agendadas</button>
+                        <button class="waplus-msg-tab" data-target="history">Histórico</button>
+                    </div>
+                    
+                    <div id="waplus-scheduled-view" class="waplus-msg-view active">
+                        <div id="waplus-scheduled-list" class="waplus-list-container"></div>
+                    </div>
+                    
+                    <div id="waplus-history-view" class="waplus-msg-view" style="display: none;">
+                        <button id="waplus-clear-history-btn" class="waplus-btn-secondary" style="margin-bottom: 10px; width: 100%;">Limpar Histórico</button>
+                        <div id="waplus-history-list" class="waplus-list-container"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="waplus-tab-content" data-content="exportar">
@@ -480,6 +513,313 @@ function setupPanelEvents(panel) {
     setupBlurControls(panel, 'desfocar-mensagens-conversa',  'blur-conversa-intensity',   toggleBlurConversa);
 
     setupDesfoquePersonalizado(panel);
+    setupScheduleMessage(panel);
+}
+
+// ========================================
+// SISTEMA DE GERENCIAMENTO DE MENSAGENS
+// ========================================
+let currentEditId = null;
+
+function setupScheduleMessage(panel) {
+    const btn = panel.querySelector('#waplus-schedule-btn');
+    const statusMsg = panel.querySelector('#waplus-schedule-status');
+    const timeInputEl = panel.querySelector('#waplus-schedule-time');
+    
+    // Configurar as abas do gerenciador
+    const msgTabs = panel.querySelectorAll('.waplus-msg-tab');
+    const msgViews = panel.querySelectorAll('.waplus-msg-view');
+
+    msgTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            msgTabs.forEach(t => t.classList.remove('active'));
+            msgViews.forEach(v => v.style.display = 'none');
+            tab.classList.add('active');
+            panel.querySelector(`#waplus-${tab.dataset.target}-view`).style.display = 'block';
+        });
+    });
+
+    const clearHistoryBtn = panel.querySelector('#waplus-clear-history-btn');
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja limpar todo o histórico de envios?')) {
+                chrome.runtime.sendMessage({ action: 'clear_history' }, (res) => {
+                    if (res && res.success) loadScheduledMessages(panel);
+                });
+            }
+        });
+    }
+
+    if (!btn || !statusMsg) return;
+
+    // Define o valor padrão para daqui a 1 hora
+    if (timeInputEl) {
+        const defaultDate = new Date();
+        defaultDate.setHours(defaultDate.getHours() + 1);
+        const tzOffset = defaultDate.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(defaultDate.getTime() - tzOffset).toISOString().slice(0, 16);
+        timeInputEl.value = localISOTime;
+    }
+
+    btn.addEventListener('click', () => {
+        const contact = panel.querySelector('#waplus-schedule-contact').value.trim();
+        const text = panel.querySelector('#waplus-schedule-text').value.trim();
+        const timeInput = panel.querySelector('#waplus-schedule-time').value;
+
+        if (!contact || !text || !timeInput) {
+            statusMsg.textContent = 'Preencha todos os campos.';
+            statusMsg.style.color = '#ef4444'; // red
+            return;
+        }
+
+        const scheduleTime = new Date(timeInput).getTime();
+        const now = Date.now();
+
+        if (scheduleTime <= now) {
+            statusMsg.textContent = 'A data deve ser no futuro.';
+            statusMsg.style.color = '#ef4444';
+            return;
+        }
+
+        const msgData = {
+            id: currentEditId || ('wa_msg_' + Date.now()),
+            contact: contact,
+            text: text,
+            scheduledTime: scheduleTime,
+            status: 'pending'
+        };
+
+        // Envia pro background salvar e agendar
+        chrome.runtime.sendMessage({
+            action: 'schedule_message',
+            data: msgData
+        }, (response) => {
+            if (response && response.success) {
+                statusMsg.textContent = currentEditId ? 'Mensagem editada com sucesso!' : 'Mensagem agendada com sucesso!';
+                statusMsg.style.color = '#00a884';
+                
+                // Limpa campos
+                panel.querySelector('#waplus-schedule-contact').value = '';
+                panel.querySelector('#waplus-schedule-text').value = '';
+                if (timeInputEl) {
+                    const defaultDate = new Date();
+                    defaultDate.setHours(defaultDate.getHours() + 1);
+                    const tzOffset = defaultDate.getTimezoneOffset() * 60000;
+                    timeInputEl.value = new Date(defaultDate.getTime() - tzOffset).toISOString().slice(0, 16);
+                }
+                
+                btn.textContent = 'Agendar Mensagem';
+                currentEditId = null;
+
+                setTimeout(() => statusMsg.textContent = '', 3000);
+                loadScheduledMessages(panel);
+            }
+        });
+    });
+
+    // Carregar lista ao inicializar
+    loadScheduledMessages(panel);
+}
+
+function loadScheduledMessages(panel) {
+    const scheduledList = panel.querySelector('#waplus-scheduled-list');
+    const historyList = panel.querySelector('#waplus-history-list');
+    
+    if (!scheduledList || !historyList) return;
+
+    chrome.storage.local.get(null, (data) => {
+        const items = Object.values(data)
+            .filter(item => item && item.id && item.id.startsWith('wa_msg_'))
+            .sort((a, b) => (b.scheduledTime || 0) - (a.scheduledTime || 0));
+
+        scheduledList.innerHTML = '';
+        historyList.innerHTML = '';
+
+        let hasScheduled = false;
+        let hasHistory = false;
+
+        items.forEach(msg => {
+            const dateStr = new Date(msg.scheduledTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' });
+            
+            const card = document.createElement('div');
+            card.className = `waplus-msg-card ${msg.status || 'pending'}`;
+            
+            let html = `
+                <div class="waplus-msg-card-header">
+                    <span class="waplus-msg-card-contact">${msg.contact}</span>
+                    <span class="waplus-msg-card-time">${msg.status === 'sent' && msg.sentAt ? 'Enviada em: ' + new Date(msg.sentAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Para: ' + dateStr}</span>
+                </div>
+                <div class="waplus-msg-card-text">${msg.text}</div>
+            `;
+
+            if (msg.status === 'sent') {
+                card.innerHTML = html;
+                historyList.appendChild(card);
+                hasHistory = true;
+            } else {
+                html += `<div class="waplus-msg-card-actions">`;
+                
+                html += `<button class="waplus-btn-action edit" data-id="${msg.id}">Editar</button>`;
+                
+                if (msg.status === 'paused') {
+                    html += `<button class="waplus-btn-action resume" data-id="${msg.id}">Retomar</button>`;
+                } else {
+                    html += `<button class="waplus-btn-action pause" data-id="${msg.id}">Pausar</button>`;
+                }
+                
+                html += `<button class="waplus-btn-action delete" data-id="${msg.id}">Cancelar</button>`;
+                html += `</div>`;
+                
+                card.innerHTML = html;
+                scheduledList.appendChild(card);
+                hasScheduled = true;
+            }
+        });
+
+        if (!hasScheduled) {
+            scheduledList.innerHTML = '<div class="waplus-empty-msg">Nenhuma mensagem agendada.</div>';
+        }
+        if (!hasHistory) {
+            historyList.innerHTML = '<div class="waplus-empty-msg">Seu histórico está vazio.</div>';
+        }
+
+        // Action Buttons Setup
+        scheduledList.querySelectorAll('.edit').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                const msg = items.find(i => i.id === id);
+                if (msg) {
+                    currentEditId = id;
+                    panel.querySelector('#waplus-schedule-contact').value = msg.contact;
+                    panel.querySelector('#waplus-schedule-text').value = msg.text;
+                    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+                    panel.querySelector('#waplus-schedule-time').value = new Date(msg.scheduledTime - tzOffset).toISOString().slice(0, 16);
+                    panel.querySelector('#waplus-schedule-btn').textContent = 'Salvar Edição';
+                }
+            });
+        });
+
+        scheduledList.querySelectorAll('.pause').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                chrome.runtime.sendMessage({ action: 'pause_message', id: e.target.dataset.id }, () => loadScheduledMessages(panel));
+            });
+        });
+
+        scheduledList.querySelectorAll('.resume').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.dataset.id;
+                const msg = items.find(i => i.id === id);
+                if (msg && msg.scheduledTime <= Date.now()) {
+                    alert('A data de agendamento já passou. Edite a mensagem para um horário no futuro.');
+                    return;
+                }
+                chrome.runtime.sendMessage({ action: 'resume_message', id, scheduledTime: msg.scheduledTime }, () => loadScheduledMessages(panel));
+            });
+        });
+
+        scheduledList.querySelectorAll('.delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (confirm('Deseja realmente cancelar este agendamento?')) {
+                    chrome.runtime.sendMessage({ action: 'cancel_message', id: e.target.dataset.id }, () => loadScheduledMessages(panel));
+                }
+            });
+        });
+    });
+}
+
+// Escuta mensagens do background para executar o envio na tela do WhatsApp
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'send_scheduled_message') {
+        executarEnvioAutomatico(request.data);
+    }
+});
+
+async function executarEnvioAutomatico(data) {
+    console.log('🚀 Iniciando envio automático para:', data.contact);
+    
+    // 1. Encontrar e clicar no botão "Nova conversa" (mais seguro do que pesquisar na lista atual)
+    let btnNovaConversa = document.querySelector('div[title="Nova conversa"], span[data-icon="chat"]');
+    if (!btnNovaConversa) {
+        console.error('❌ Não achou o botão de Nova Conversa');
+        return;
+    }
+    
+    btnNovaConversa.closest('div[role="button"]').click();
+    await new Promise(r => setTimeout(r, 800)); // Aguarda painel lateral de contatos carregar
+
+    // 2. Achar a barra de pesquisa que abre
+    // A barra de pesquisa tem o title="Caixa de texto de pesquisa" ou parecido
+    let searchInput = document.querySelector('div[contenteditable="true"][data-tab="3"], div[title="Caixa de texto de pesquisa"]');
+    if (!searchInput) {
+        console.error('❌ Não foi possível encontrar a barra de pesquisa de contatos.');
+        return;
+    }
+
+    searchInput.focus();
+    
+    // Fallback pra inserir texto que ativa os eventos do React do Whatsapp
+    const inputEvent = new InputEvent('input', { bubbles: true, cancelable: true });
+    searchInput.textContent = data.contact;
+    searchInput.dispatchEvent(inputEvent);
+    
+    // 3. Aguardar o contato aparecer na lista e clicar
+    await new Promise(r => setTimeout(r, 2000)); // Esperar pesquisa React
+    
+    // Procurar resultados da busca 
+    const resultList = document.querySelectorAll('div[aria-label="Resultados da pesquisa"] div[role="listitem"], div[role="row"]');
+    
+    let clicked = false;
+    // Pega o primeiro contato válido não-header
+    for (let chat of resultList) {
+        if(chat.innerText.includes(data.contact) || chat.innerText.length > 5) {
+            chat.click();
+            clicked = true;
+            break;
+        }
+    }
+
+    if (!clicked) {
+        // Fallback genérico caso a lista não filtre perfeitamente (simplesmente clica no primeiro visível abaixo do input)
+        const possibleChats = document.querySelectorAll('div[tabindex="-1"][role="button"]');
+        if(possibleChats.length > 0) {
+           possibleChats[0].click();
+        } else {
+           console.error('❌ Não conseguiu encontrar e clicar no contato.');
+           return;
+        }
+    }
+
+    await new Promise(r => setTimeout(r, 1500)); // Esperar chat abrir
+    
+    // 4. Cola a mensagem no campo da conversa
+    const messageInput = document.querySelector('div[contenteditable="true"][data-tab="10"], div[title="Digite uma mensagem"]');
+    if (!messageInput) {
+        console.error('❌ Não foi possível encontrar a caixa de mensagens da conversa.');
+        return;
+    }
+    
+    messageInput.focus();
+    
+    // Inserir texto disparando os eventos para o WhatsApp reconhecer a mensagem
+    document.execCommand('insertText', false, data.text);
+    const msgEvent = new InputEvent('input', { bubbles: true, cancelable: true });
+    messageInput.dispatchEvent(msgEvent);
+    
+    await new Promise(r => setTimeout(r, 500));
+    
+    // 5. Clicar no botão de enviar
+    const sendButton = document.querySelector('span[data-icon="send"]')?.closest('button');
+    if (sendButton) {
+        sendButton.click();
+        console.log('✅ Mensagem enviada com sucesso!');
+    } else {
+        // Fallback: se não achar o botão, simula tecla Enter
+        const enterEvent = new KeyboardEvent('keydown', {
+            bubbles: true, cancelable: true, keyCode: 13, key: 'Enter'
+        });
+        messageInput.dispatchEvent(enterEvent);
+        console.log('✅ Tentativa de envio com a tecla Enter.');
+    }
 }
 
 // ========================================

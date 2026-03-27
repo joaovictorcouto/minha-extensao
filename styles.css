@@ -542,3 +542,639 @@
   pointer-events: none;
   opacity: 0.7;
 }
+
+/* ========================================
+   AGENDAMENTO DE MENSAGENS
+   ======================================== */
+
+.waplus-schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #1f2c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+.waplus-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.waplus-input-group label {
+  font-size: 11px;
+  color: #8696a0;
+  font-weight: 500;
+}
+
+.waplus-input-group input[type="text"],
+.waplus-input-group input[type="datetime-local"],
+.waplus-input-group textarea {
+  background: #2a3942;
+  border: 1px solid #3b4a54;
+  color: #d1d7db;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.waplus-input-group input:focus,
+.waplus-input-group textarea:focus {
+  border-color: #00a884;
+}
+
+.waplus-input-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Estilo para placeholder de cor clara */
+.waplus-input-group input::placeholder,
+.waplus-input-group textarea::placeholder {
+  color: #667781;
+}
+
+/* Tratamento especial para o ícone de calendário no input data */
+.waplus-input-group input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.waplus-input-group input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.waplus-btn-primary {
+  background: #00a884;
+  color: #111b21;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.waplus-btn-primary:hover {
+  background: #06cf9c;
+}
+
+.waplus-status-msg {
+  font-size: 11px;
+  text-align: center;
+  min-height: 15px; /* Manter espaço */
+}
+
+/* Switch + texto colados à esquerda */
+.waplus-suboption-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Container da chave */
+.waplus-toggle {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+
+/* Esconde o checkbox nativo */
+.waplus-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Trilho */
+.waplus-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #3b4a54;   /* OFF */
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+/* Bolinha */
+.waplus-toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  top: 2px;
+  background-color: #e9edef;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+/* ON */
+.waplus-toggle input:checked + .waplus-toggle-slider {
+  background-color: #00a884;
+}
+
+.waplus-toggle input:checked + .waplus-toggle-slider::before {
+  transform: translateX(14px);
+}
+
+/* Slider curto à direita (override do padrão) */
+.waplus-compact-slider {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 110px;
+  max-width: 150px;
+}
+
+.waplus-compact-slider input[type="range"] {
+  flex: 1;
+  height: 4px;      /* mais fino */
+  background: #1f2c33;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.waplus-compact-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;      /* bolinha menor */
+  height: 10px;
+  background: #00a884;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.waplus-compact-slider .waplus-slider-value {
+  font-size: 10px;
+  color: #8696a0;
+  min-width: 26px;
+  text-align: right;
+}
+
+
+/* Quando a função principal está OFF, deixamos os switches "apagados" */
+#waplus-panel.waplus-main-off .waplus-toggle-slider {
+  background-color: #2a3942;      /* trilho mais escuro */
+}
+
+#waplus-panel.waplus-main-off .waplus-toggle-slider::before {
+  background-color: #8796a0;      /* bolinha cinza */
+}
+
+#waplus-panel.waplus-main-off .waplus-suboption-title {
+  color: #8696a0;                 /* texto mais apagado */
+}
+
+/* Opcional: impedir clique nas sub-opções quando a principal está OFF */
+#waplus-panel.waplus-main-off .waplus-suboption {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ========================================
+   AGENDAMENTO DE MENSAGENS
+   ======================================== */
+
+.waplus-schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #1f2c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+.waplus-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.waplus-input-group label {
+  font-size: 11px;
+  color: #8696a0;
+  font-weight: 500;
+}
+
+.waplus-input-group input[type="text"],
+.waplus-input-group input[type="datetime-local"],
+.waplus-input-group textarea {
+  background: #2a3942;
+  border: 1px solid #3b4a54;
+  color: #d1d7db;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.waplus-input-group input:focus,
+.waplus-input-group textarea:focus {
+  border-color: #00a884;
+}
+
+.waplus-input-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Estilo para placeholder de cor clara */
+.waplus-input-group input::placeholder,
+.waplus-input-group textarea::placeholder {
+  color: #667781;
+}
+
+/* Tratamento especial para o ícone de calendário no input data */
+.waplus-input-group input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.waplus-input-group input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.waplus-btn-primary {
+  background: #00a884;
+  color: #111b21;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.waplus-btn-primary:hover {
+  background: #06cf9c;
+}
+
+/* Switch + texto colados à esquerda */
+.waplus-suboption-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Container da chave */
+.waplus-toggle {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 18px;
+}
+
+/* Esconde o checkbox nativo */
+.waplus-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Trilho */
+.waplus-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #3b4a54;   /* OFF */
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+/* Bolinha */
+.waplus-toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  top: 2px;
+  background-color: #e9edef;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+/* ON */
+.waplus-toggle input:checked + .waplus-toggle-slider {
+  background-color: #00a884;
+}
+
+.waplus-toggle input:checked + .waplus-toggle-slider::before {
+  transform: translateX(14px);
+}
+
+/* Slider curto à direita (override do padrão) */
+.waplus-compact-slider {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 110px;
+  max-width: 150px;
+}
+
+.waplus-compact-slider input[type="range"] {
+  flex: 1;
+  height: 4px;      /* mais fino */
+  background: #1f2c33;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.waplus-compact-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;      /* bolinha menor */
+  height: 10px;
+  background: #00a884;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.waplus-compact-slider .waplus-slider-value {
+  font-size: 10px;
+  color: #8696a0;
+  min-width: 26px;
+  text-align: right;
+}
+
+
+/* Quando a função principal está OFF, deixamos os switches "apagados" */
+#waplus-panel.waplus-main-off .waplus-toggle-slider {
+  background-color: #2a3942;      /* trilho mais escuro */
+}
+
+#waplus-panel.waplus-main-off .waplus-toggle-slider::before {
+  background-color: #8796a0;      /* bolinha cinza */
+}
+
+#waplus-panel.waplus-main-off .waplus-suboption-title {
+  color: #8696a0;                 /* texto mais apagado */
+}
+
+/* Opcional: impedir clique nas sub-opções quando a principal está OFF */
+#waplus-panel.waplus-main-off .waplus-suboption {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ========================================
+   AGENDAMENTO DE MENSAGENS
+   ======================================== */
+
+.waplus-schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #1f2c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+.waplus-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.waplus-input-group label {
+  font-size: 11px;
+  color: #8696a0;
+  font-weight: 500;
+}
+
+.waplus-input-group input[type="text"],
+.waplus-input-group input[type="datetime-local"],
+.waplus-input-group textarea {
+  background: #2a3942;
+  border: 1px solid #3b4a54;
+  color: #d1d7db;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.waplus-input-group input:focus,
+.waplus-input-group textarea:focus {
+  border-color: #00a884;
+}
+
+.waplus-input-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Estilo para placeholder de cor clara */
+.waplus-input-group input::placeholder,
+.waplus-input-group textarea::placeholder {
+  color: #667781;
+}
+
+/* Tratamento especial para o ícone de calendário no input data */
+.waplus-input-group input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.waplus-input-group input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.waplus-btn-primary {
+  background: #00a884;
+  color: #111b21;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.waplus-btn-primary:hover {
+  background: #06cf9c;
+}
+
+.waplus-btn-primary:active {
+  background: #008f6f;
+}
+
+.waplus-status-msg {
+  font-size: 11px;
+  text-align: center;
+  min-height: 15px; /* Manter espaço */
+}
+
+/* ========================================
+   GERENCIADOR DE MENSAGENS E HISTÓRICO
+   ======================================== */
+
+.waplus-msg-manager {
+  background: #111b21;
+  border-radius: 8px;
+  border: 1px solid #2a3942;
+  overflow: hidden;
+}
+
+.waplus-msg-tabs {
+  display: flex;
+  background: #1f2c33;
+  border-bottom: 2px solid #2a3942;
+}
+
+.waplus-msg-tab {
+  flex: 1;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: #8696a0;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.waplus-msg-tab:hover {
+  background: #2a3942;
+}
+
+.waplus-msg-tab.active {
+  color: #00a884;
+  border-bottom-color: #00a884;
+}
+
+.waplus-msg-view {
+  padding: 10px;
+}
+
+.waplus-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.waplus-list-container::-webkit-scrollbar {
+  width: 4px;
+}
+.waplus-list-container::-webkit-scrollbar-thumb {
+  background: #2a3942;
+  border-radius: 2px;
+}
+
+.waplus-msg-card {
+  background: #1f2c33;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 3px solid #00a884;
+  font-size: 11px;
+  color: #d1d7db;
+}
+
+.waplus-msg-card.paused {
+  border-left-color: #f59e0b;
+}
+
+.waplus-msg-card.sent {
+  border-left-color: #3b82f6;
+}
+
+.waplus-msg-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.waplus-msg-card-contact {
+  font-weight: 600;
+  color: #e9edef;
+}
+
+.waplus-msg-card-time {
+  color: #8696a0;
+  font-size: 10px;
+}
+
+.waplus-msg-card-text {
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.waplus-msg-card-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.waplus-btn-action {
+  background: #2a3942;
+  border: none;
+  color: #d1d7db;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.waplus-btn-action:hover {
+  background: #3b4a54;
+}
+
+.waplus-btn-action.delete:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.waplus-empty-msg {
+  text-align: center;
+  color: #8696a0;
+  padding: 20px 0;
+  font-size: 11px;
+}
+
+.waplus-btn-secondary {
+  background: #2a3942;
+  color: #d1d7db;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.waplus-btn-secondary:hover {
+  background: #3b4a54;
+}
