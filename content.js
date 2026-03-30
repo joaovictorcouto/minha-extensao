@@ -337,32 +337,36 @@ function openWaPlusPanel() {
 
 
                 <!-- 4. Mensagens na conversa -->
-                <div class="waplus-suboption-row">
-                    <label class="waplus-suboption">
-                    <span class="waplus-suboption-left">
-                        <label class="waplus-toggle">
-                        <input type="checkbox" id="desfocar-mensagens-conversa" ${conversaChecked ? 'checked' : ''}>
-                        <span class="waplus-toggle-slider"></span>
+                    <div class="waplus-suboption-row">
+                        <label class="waplus-suboption">
+                        <span class="waplus-suboption-left">
+                            <label class="waplus-toggle">
+                            <input type="checkbox" id="desfocar-mensagens-conversa" ${conversaChecked ? 'checked' : ''}>
+                            <span class="waplus-toggle-slider"></span>
+                            </label>
+                            <span class="waplus-suboption-title">Mensagens na conversa</span>
+                        </span>
+
+                        <div class="waplus-compact-slider">
+                            <input type="range" id="blur-conversa-intensity" min="0" max="20" value="${conversaValue}" step="1">
+                            <span class="waplus-slider-value">${conversaValue}px</span>
+                        </div>
                         </label>
-                        <span class="waplus-suboption-title">Mensagens na conversa</span>
-                    </span>
-
-                    <div class="waplus-compact-slider">
-                        <input type="range" id="blur-conversa-intensity" min="0" max="20" value="${conversaValue}" step="1">
-                        <span class="waplus-slider-value">${conversaValue}px</span>
                     </div>
-                    </label>
                 </div>
-
             </div>
 
             <div class="waplus-tab-content" data-content="mensagens">
                 <h3 style="margin-top: 5px;">Agendar Nova Mensagem</h3>
                 
                 <div class="waplus-schedule-container">
-                    <div class="waplus-input-group">
-                        <label for="waplus-schedule-contact">Número do Whatsapp (com DDD):</label>
-                        <input type="text" id="waplus-schedule-contact" placeholder="Ex: 5511999999999">
+                    <div class="waplus-input-group" style="position: relative;">
+                        <label for="waplus-schedule-contact">Número do Whatsapp (com DDD) ou Nome:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="waplus-schedule-contact" autocomplete="off" placeholder="Ex: 5511999999999 ou Nome" style="flex: 1;">
+                            <button id="waplus-sync-contacts-btn" class="waplus-btn-secondary" title="Sincronizar conversas antigas e arquivadas" style="padding: 0 12px; font-size: 16px;">🔄</button>
+                        </div>
+                        <ul id="waplus-custom-dropdown" class="waplus-autocomplete-list" style="display: none;"></ul>
                     </div>
                     
                     <div class="waplus-input-group">
@@ -397,7 +401,7 @@ function openWaPlusPanel() {
                 </div>
             </div>
 
-            <div class="waplus-tab-content" data-content="exportar">
+            <div class="waplus-tab-content" data-content="exportacao">
                 <h3>Em Breve</h3>
                 <p>Funcionalidades de exportação em desenvolvimento...</p>
             </div>
@@ -503,7 +507,11 @@ function setupPanelEvents(panel) {
             tabs.forEach(t => t.classList.remove('active'));
             contents.forEach(c => c.classList.remove('active'));
             tab.classList.add('active');
-            panel.querySelector(`[data-content="${targetTab}"]`).classList.add('active');
+            
+            const targetContent = panel.querySelector(`[data-content="${targetTab}"]`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         });
     });
 
@@ -525,6 +533,135 @@ function setupScheduleMessage(panel) {
     const btn = panel.querySelector('#waplus-schedule-btn');
     const statusMsg = panel.querySelector('#waplus-schedule-status');
     const timeInputEl = panel.querySelector('#waplus-schedule-time');
+    const contactInputEl = panel.querySelector('#waplus-schedule-contact');
+    const customDropdown = panel.querySelector('#waplus-custom-dropdown');
+    
+    // Pede ao código injetado a agenda completa de contatos na nuvem
+    window.postMessage({ from: 'WAPlusContent', action: 'GET_CONTACTS' }, '*');
+    
+    // Auto-completar dinâmico (Dropdown Customizado)
+    if (contactInputEl && customDropdown) {
+        let allContacts = [];
+
+        contactInputEl.addEventListener('focus', () => {
+            if (deepContactsMemory && deepContactsMemory.length > 0) {
+                // Utiliza os contatos profundos se a injeção for bem sucedida (Todos, até arquivados)
+                const namesExtracted = deepContactsMemory.map(c => c.name);
+                allContacts = Array.from(new Set(namesExtracted)).filter(Boolean).sort();
+                renderDropdown(allContacts);
+            } else {
+                // Fallback visual via DOM
+                const nomes = new Set();
+                
+                // Restringe rigorosamente apeans a nomes da lista do menu lateral, 
+                // para evitar engolir trechos de mensagens ativas como "Ah sim" ou "digitando"
+                document.querySelectorAll('#pane-side span[title]').forEach(el => {
+                    // Contatos reais normalmente possuem a tag dir="auto"
+                    if (el.getAttribute('dir') === 'auto') {
+                        const title = el.title.trim();
+                        if (title && title.length > 2 && title.length < 40 && !title.includes(':') && !title.includes('Pesquisar') && !title.includes('Arquivadas')) {
+                            nomes.add(title);
+                        }
+                    }
+                });
+                
+                allContacts = Array.from(nomes).sort();
+                renderDropdown(allContacts);
+            }
+        });
+
+        contactInputEl.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = allContacts.filter(c => c.toLowerCase().includes(val));
+            renderDropdown(filtered);
+        });
+
+        function renderDropdown(list) {
+            customDropdown.innerHTML = '';
+            if (list.length === 0) {
+                customDropdown.style.display = 'none';
+                return;
+            }
+            list.forEach(nome => {
+                const li = document.createElement('li');
+                li.textContent = nome;
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Impede o blur do input
+                    contactInputEl.value = nome;
+                    customDropdown.style.display = 'none';
+                });
+                customDropdown.appendChild(li);
+            });
+            customDropdown.style.display = 'block';
+        }
+
+        contactInputEl.addEventListener('blur', () => {
+            setTimeout(() => { customDropdown.style.display = 'none'; }, 150);
+        });
+    }
+    
+    // ========================================
+    // PIPELINE DE SCROLL (LAZY LOAD) 
+    // ========================================
+    const syncBtn = panel.querySelector('#waplus-sync-contacts-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', async () => {
+            syncBtn.disabled = true;
+            syncBtn.textContent = '⏳';
+            
+            const delay = ms => new Promise(r => setTimeout(r, ms));
+            console.log('[WA Plus] Iniciando Pipeline de Carregamento de Contatos Antigos/Arquivados...');
+
+            try {
+                // 1. Scroll na Lista Principal
+                const mainList = document.querySelector('[aria-label="Lista de conversas"]');
+                if (mainList) {
+                    for (let i = 0; i < 15; i++) {
+                        mainList.scrollTop = mainList.scrollHeight;
+                        await delay(400);
+                    }
+                }
+                
+                // 2. Abrir e scrollar as Arquivadas
+                const archivedBtn = document.querySelector('div[title="Arquivadas"]')?.closest('button, div[role="button"]') ||
+                                    Array.from(document.querySelectorAll('span')).find(s => ['Arquivadas', 'Archived'].includes(s.innerText))?.closest('button, div[role="button"]');
+                
+                if (archivedBtn) {
+                    archivedBtn.click();
+                    await delay(1200); // Aguarda a transição de tela
+                    
+                    const archivedList = document.querySelector('[aria-label="Lista de conversas"]');
+                    if (archivedList) {
+                         for (let i = 0; i < 15; i++) {
+                            archivedList.scrollTop = archivedList.scrollHeight;
+                            await delay(400);
+                        }
+                    }
+                    
+                    // Voltar para a tela inicial
+                    const backBtn = document.querySelector('span[data-icon="back"]')?.closest('button, div[role="button"]');
+                    if (backBtn) {
+                        backBtn.click();
+                        await delay(800);
+                    }
+                }
+                
+                console.log('[WA Plus] Scroll finalizado. Solicitando contatos aos pacotes Store do Webpack...');
+                // 3. Força o injetor a coletar os Models carregados do Store e preencher o deepContactsMemory
+                window.postMessage({ from: 'WAPlusContent', action: 'GET_CONTACTS' }, '*');
+                
+                syncBtn.textContent = '✅';
+            } catch (e) {
+                console.error('[WA Plus] Erro no pipeline de scroll:', e);
+                syncBtn.textContent = '❌';
+            } finally {
+                setTimeout(() => {
+                    syncBtn.textContent = '🔄';
+                    syncBtn.disabled = false;
+                }, 3000);
+            }
+        });
+    }
     
     // Configurar as abas do gerenciador
     const msgTabs = panel.querySelectorAll('.waplus-msg-tab');
@@ -576,7 +713,7 @@ function setupScheduleMessage(panel) {
         const now = Date.now();
 
         if (scheduleTime <= now) {
-            statusMsg.textContent = 'A data deve ser no futuro.';
+            statusMsg.textContent = 'A data de agendamento deve ser no futuro!';
             statusMsg.style.color = '#ef4444';
             return;
         }
@@ -653,13 +790,17 @@ function loadScheduledMessages(panel) {
             `;
 
             if (msg.status === 'sent') {
+                html += `<div class="waplus-msg-card-actions" style="margin-top: 5px;">`;
+                html += `<button class="waplus-btn-action clone" data-id="${msg.id}" title="Pegar Mensagem">Pegar</button>`;
+                html += `</div>`;
                 card.innerHTML = html;
                 historyList.appendChild(card);
                 hasHistory = true;
             } else {
                 html += `<div class="waplus-msg-card-actions">`;
                 
-                html += `<button class="waplus-btn-action edit" data-id="${msg.id}">Editar</button>`;
+                html += `<button class="waplus-btn-action edit" data-id="${msg.id}" title="Editar Mensagem">Editar</button>`;
+                html += `<button class="waplus-btn-action clone" data-id="${msg.id}" title="Pegar Mensagem">Pegar</button>`;
                 
                 if (msg.status === 'paused') {
                     html += `<button class="waplus-btn-action resume" data-id="${msg.id}">Retomar</button>`;
@@ -683,10 +824,38 @@ function loadScheduledMessages(panel) {
             historyList.innerHTML = '<div class="waplus-empty-msg">Seu histórico está vazio.</div>';
         }
 
-        // Action Buttons Setup
+        // Helper function for cloning messages
+        const setupCloneBtn = (e) => {
+            const id = e.currentTarget.dataset.id;
+            const msg = items.find(i => i.id === id);
+            if (msg) {
+                currentEditId = null; // Important: ensure it's a new message
+                panel.querySelector('#waplus-schedule-contact').value = msg.contact;
+                panel.querySelector('#waplus-schedule-text').value = msg.text;
+                const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+                panel.querySelector('#waplus-schedule-time').value = new Date(msg.scheduledTime - tzOffset).toISOString().slice(0, 16);
+                panel.querySelector('#waplus-schedule-btn').textContent = 'Agendar Mensagem';
+                panel.querySelector('#waplus-schedule-contact').focus();
+                
+                // Switch tab back to "Agendadas" view so user can interact with the input form
+                const btnTabs = panel.querySelectorAll('.waplus-msg-tab');
+                const views = panel.querySelectorAll('.waplus-msg-view');
+                btnTabs.forEach(t => t.classList.remove('active'));
+                views.forEach(v => v.style.display = 'none');
+                const scheduledTabBtn = panel.querySelector('.waplus-msg-tab[data-target="scheduled"]');
+                if(scheduledTabBtn) scheduledTabBtn.classList.add('active');
+                const scheduledView = panel.querySelector('#waplus-scheduled-view');
+                if(scheduledView) scheduledView.style.display = 'block';
+            }
+        };
+
+        scheduledList.querySelectorAll('.clone').forEach(btn => btn.addEventListener('click', setupCloneBtn));
+        historyList.querySelectorAll('.clone').forEach(btn => btn.addEventListener('click', setupCloneBtn));
+
+        // Action Buttons Setup for Edit
         scheduledList.querySelectorAll('.edit').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = e.target.dataset.id;
+                const id = e.currentTarget.dataset.id;
                 const msg = items.find(i => i.id === id);
                 if (msg) {
                     currentEditId = id;
@@ -695,6 +864,7 @@ function loadScheduledMessages(panel) {
                     const tzOffset = (new Date()).getTimezoneOffset() * 60000;
                     panel.querySelector('#waplus-schedule-time').value = new Date(msg.scheduledTime - tzOffset).toISOString().slice(0, 16);
                     panel.querySelector('#waplus-schedule-btn').textContent = 'Salvar Edição';
+                    panel.querySelector('#waplus-schedule-contact').focus();
                 }
             });
         });
@@ -737,19 +907,53 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 async function executarEnvioAutomatico(data) {
     console.log('🚀 Iniciando envio automático para:', data.contact);
     
-    // 1. Encontrar e clicar no botão "Nova conversa" (mais seguro do que pesquisar na lista atual)
-    let btnNovaConversa = document.querySelector('div[title="Nova conversa"], span[data-icon="chat"]');
+    // 0. Tenta o envio profundo e invisível em Background primeiro!
+    const msgId = Date.now().toString();
+    const bgSendPromise = new Promise((resolve) => {
+        const handler = (event) => {
+            if (event.source !== window || !event.data || event.data.from !== 'WAPlusInjected') return;
+            if (event.data.action === 'MESSAGE_SENT_RESULT' && event.data.msgId === msgId) {
+                window.removeEventListener('message', handler);
+                resolve(event.data.result);
+            }
+        };
+        window.addEventListener('message', handler);
+        // Timeout de 4.5s pra se o background não responder
+        setTimeout(() => { window.removeEventListener('message', handler); resolve(false); }, 4500);
+        
+        window.postMessage({ from: 'WAPlusContent', action: 'SEND_MESSAGE', contactStr: data.contact, text: data.text, msgId }, '*');
+    });
+    
+    const wasSentSilently = await bgSendPromise;
+    if (wasSentSilently) {
+        console.log('✅ Enviado 100% silenciosamente em Segundo Plano pela API do Zap!');
+        return; // Sucesso, finaliza a execução
+    }
+    
+    console.log('⚠️ Envio silencioso indisponível/falhou. Recorrendo à automação nativa e visual.');
+    
+    // 1. Encontrar o botão "Nova conversa" (mais seguro do que pesquisar na lista atual)
+    let btnNovaConversa = document.querySelector('div[title="Nova conversa"], button[aria-label="Nova conversa"], span[data-icon="chat"], span[data-icon="new-chat-outline"]');
     if (!btnNovaConversa) {
         console.error('❌ Não achou o botão de Nova Conversa');
         return;
     }
     
-    btnNovaConversa.closest('div[role="button"]').click();
-    await new Promise(r => setTimeout(r, 800)); // Aguarda painel lateral de contatos carregar
+    // Clica no botão e aguarda o menu abrir
+    const btnParent = btnNovaConversa.closest('div[role="button"], button') || btnNovaConversa;
+    btnParent.click();
+    await new Promise(r => setTimeout(r, 1200)); // Aguarda painel lateral (um pouco a mais)
 
     // 2. Achar a barra de pesquisa que abre
-    // A barra de pesquisa tem o title="Caixa de texto de pesquisa" ou parecido
-    let searchInput = document.querySelector('div[contenteditable="true"][data-tab="3"], div[title="Caixa de texto de pesquisa"]');
+    // Fallbacks amplos porque o WhatsApp Web ofusca atributos
+    let searchInput = document.querySelector('div[contenteditable="true"][data-tab="3"]') ||
+                      document.querySelector('div[title="Caixa de texto de pesquisa"]') ||
+                      document.querySelector('div[title="Pesquisar contatos"]') ||
+                      document.querySelector('div[title="Pesquisar nome ou número"]') ||
+                      document.querySelector('div[data-testid="chat-list-search"] div[contenteditable="true"]') ||
+                      // Fallback bruto: o primeiro campo editável da tela é sempre a caixa de pesquisa do painel
+                      document.querySelector('div[contenteditable="true"]');
+
     if (!searchInput) {
         console.error('❌ Não foi possível encontrar a barra de pesquisa de contatos.');
         return;
@@ -757,19 +961,29 @@ async function executarEnvioAutomatico(data) {
 
     searchInput.focus();
     
-    // Fallback pra inserir texto que ativa os eventos do React do Whatsapp
-    const inputEvent = new InputEvent('input', { bubbles: true, cancelable: true });
-    searchInput.textContent = data.contact;
+    // Fallback pra limpar e inserir texto que ativa os eventos do React do Whatsapp
+    document.execCommand('selectAll', false, null);
+    document.execCommand('delete', false, null);
+    document.execCommand('insertText', false, data.contact);
+    
+    const inputEvent = new Event('input', { bubbles: true, cancelable: true });
     searchInput.dispatchEvent(inputEvent);
     
     // 3. Aguardar o contato aparecer na lista e clicar
     await new Promise(r => setTimeout(r, 2000)); // Esperar pesquisa React
     
-    // Procurar resultados da busca 
-    const resultList = document.querySelectorAll('div[aria-label="Resultados da pesquisa"] div[role="listitem"], div[role="row"]');
-    
     let clicked = false;
-    // Pega o primeiro contato válido não-header
+    
+    // Tenta pressionar ENTER para ir no primeiro resultado da busca
+    const enterSearchEvent = new KeyboardEvent('keydown', {
+        bubbles: true, cancelable: true, keyCode: 13, key: 'Enter'
+    });
+    searchInput.dispatchEvent(enterSearchEvent);
+    
+    await new Promise(r => setTimeout(r, 1000));
+    
+    // Se não abriu via ENTER, tenta clicar no primeiro contato
+    const resultList = document.querySelectorAll('div[aria-label="Resultados da pesquisa"] div[role="listitem"], div[role="row"]');
     for (let chat of resultList) {
         if(chat.innerText.includes(data.contact) || chat.innerText.length > 5) {
             chat.click();
@@ -779,7 +993,6 @@ async function executarEnvioAutomatico(data) {
     }
 
     if (!clicked) {
-        // Fallback genérico caso a lista não filtre perfeitamente (simplesmente clica no primeiro visível abaixo do input)
         const possibleChats = document.querySelectorAll('div[tabindex="-1"][role="button"]');
         if(possibleChats.length > 0) {
            possibleChats[0].click();
@@ -791,8 +1004,32 @@ async function executarEnvioAutomatico(data) {
 
     await new Promise(r => setTimeout(r, 1500)); // Esperar chat abrir
     
+    // 3.5 Confirma se o contato atual aberto é o contato correto antes de enviar
+    const headerTitleEl = document.querySelector('header span[title]');
+    if (headerTitleEl) {
+        const openedContact = headerTitleEl.getAttribute('title').trim();
+        
+        const cleanOpened = openedContact.replace(/\D/g, '');
+        const cleanTarget = data.contact.replace(/\D/g, '');
+        
+        let isValid = false;
+        if (openedContact.toLowerCase() === data.contact.toLowerCase()) isValid = true;
+        // Ambos números, pelo menos 8 dígitos correspondentes
+        else if (cleanTarget.length >= 8 && cleanOpened.includes(cleanTarget)) isValid = true;
+        else if (cleanOpened.length >= 8 && cleanTarget.includes(cleanOpened)) isValid = true;
+        // Correspondência parcial do nome
+        else if (openedContact.toLowerCase().includes(data.contact.toLowerCase())) isValid = true;
+
+        if (!isValid) {
+            console.error('❌ ERRO DE SEGURANÇA: O contato aberto (' + openedContact + ') não bate com o alvo (' + data.contact + '). Envio abortado.');
+            return;
+        }
+    } else {
+        console.warn('⚠️ Não foi possível verificar com 100% de certeza o contato pelo cabeçalho. Prosseguindo.');
+    }
+    
     // 4. Cola a mensagem no campo da conversa
-    const messageInput = document.querySelector('div[contenteditable="true"][data-tab="10"], div[title="Digite uma mensagem"]');
+    const messageInput = document.querySelector('div[contenteditable="true"][data-tab="10"], div[title="Digite uma mensagem"], footer div[contenteditable="true"]');
     if (!messageInput) {
         console.error('❌ Não foi possível encontrar a caixa de mensagens da conversa.');
         return;
@@ -801,14 +1038,17 @@ async function executarEnvioAutomatico(data) {
     messageInput.focus();
     
     // Inserir texto disparando os eventos para o WhatsApp reconhecer a mensagem
+    document.execCommand('selectAll', false, null);
+    document.execCommand('delete', false, null);
     document.execCommand('insertText', false, data.text);
-    const msgEvent = new InputEvent('input', { bubbles: true, cancelable: true });
+    
+    const msgEvent = new Event('input', { bubbles: true, cancelable: true });
     messageInput.dispatchEvent(msgEvent);
     
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 800));
     
     // 5. Clicar no botão de enviar
-    const sendButton = document.querySelector('span[data-icon="send"]')?.closest('button');
+    const sendButton = document.querySelector('span[data-icon="send"]')?.closest('button') || document.querySelector('button[aria-label="Enviar"]');
     if (sendButton) {
         sendButton.click();
         console.log('✅ Mensagem enviada com sucesso!');
@@ -1155,3 +1395,141 @@ document.addEventListener('click', (e) => {
     
     closeWaPlusPanel();
 }, true);
+
+// ========================================
+// INJEÇÃO PROFUNDA (WEB-PACK / WA-API)
+// ========================================
+
+let deepContactsMemory = [];
+
+window.addEventListener('message', (event) => {
+    if (event.source !== window || !event.data || event.data.from !== 'WAPlusInjected') return;
+    
+    if (event.data.action === 'CONTACTS_DATA') {
+        if (!event.data.error && event.data.data && event.data.data.length > 0) {
+            deepContactsMemory = event.data.data;
+            console.log(`[WA Plus] ${deepContactsMemory.length} contatos da Agenda carregados em Segundo Plano.`);
+        }
+    }
+});
+
+const injectScript = document.createElement('script');
+injectScript.textContent = `
+    window.WAPlus = {};
+    window.WAPlusReady = false;
+
+    function findModule(filterCondition) {
+        if (!window.webpackChunkwhatsapp_web_client) return null;
+        let result = null;
+        window.webpackChunkwhatsapp_web_client.push([
+            [Math.random().toString(36).substring(7)],
+            {},
+            (require) => {
+                const modules = require.c;
+                for (let moduleId in modules) {
+                    try {
+                        const m = modules[moduleId];
+                        if (m && m.exports && filterCondition(m.exports)) {
+                            result = m.exports;
+                            break;
+                        }
+                        if (m && m.exports && m.exports.default && filterCondition(m.exports.default)) {
+                            result = m.exports.default;
+                            break;
+                        }
+                    } catch (e) {}
+                }
+            }
+        ]);
+        return result;
+    }
+
+    function initDeepHook() {
+        if (!window.webpackChunkwhatsapp_web_client) {
+            setTimeout(initDeepHook, 1000);
+            return;
+        }
+        
+        console.log('[WA Plus] Iniciando Injeção Profunda de Segundo Plano...');
+        
+        // Em 2024/2026, os módulos do WhatsApp mudam muito. m.Msg nem sempre fica junto com Chat e Contact.
+        const Store = findModule(m => m.Chat && m.Contact);
+        const SendModule = findModule(m => m.sendTextMsgToChat);
+        
+        if (Store) window.WAPlus.Store = Store;
+        if (SendModule) window.WAPlus.sendTextMsgToChat = SendModule.sendTextMsgToChat;
+        
+        // Considera pronto se acharmos o Store (já é o bastante pros contatos). O envio silencioso precisa do SendModule.
+        window.WAPlusReady = !!Store;
+        
+        if(window.WAPlusReady) {
+            console.log('[WA Plus] API Interna conectada! Banco de dados de contatos acessível.');
+            if (SendModule) console.log('[WA Plus] Módulo de Envio Silencioso ativado.');
+            else console.log('[WA Plus] Envio Silencioso não encontrado, usaremos fallback visual.');
+            extractContacts();
+        } else {
+            console.warn('[WA Plus] WA atualizou os módulos vitais. O Fallback Visual entrará em cena automaticamente.');
+        }
+    }
+    
+    setTimeout(initDeepHook, 3000); // Aguarda tela base renderizar
+    
+    function extractContacts() {
+        if (!window.WAPlus.Store || !window.WAPlus.Store.Contact) return;
+        try {
+            const arr = window.WAPlus.Store.Contact.getModelsArray();
+            const contacts = arr
+                .filter(c => c.isUser && (c.name || c.pushname || c.formattedName))
+                .map(c => ({
+                    id: c.id && c.id._serialized,
+                    name: c.name || c.pushname || c.formattedName,
+                    number: c.id && c.id.user
+                }));
+            window.postMessage({ from: 'WAPlusInjected', action: 'CONTACTS_DATA', data: contacts }, '*');
+        } catch (e) {
+            console.error('[WA Plus] Erro extração Webpack:', e);
+            window.postMessage({ from: 'WAPlusInjected', action: 'CONTACTS_DATA', data: [], error: true }, '*');
+        }
+    }
+    
+    window.addEventListener('message', async (event) => {
+        if (event.source !== window || !event.data || event.data.from !== 'WAPlusContent') return;
+        
+        if (event.data.action === 'GET_CONTACTS') extractContacts();
+        
+        if (event.data.action === 'SEND_MESSAGE') {
+            const { contactStr, text, msgId } = event.data;
+            if (!window.WAPlus.sendTextMsgToChat || !window.WAPlus.Store) {
+                window.postMessage({ from: 'WAPlusInjected', action: 'MESSAGE_SENT_RESULT', result: false, msgId }, '*');
+                return;
+            }
+            
+            try {
+                const targetNumber = contactStr.replace(/\\D/g, ''); 
+                const fullId = targetNumber + '@c.us'; 
+                
+                let chat = window.WAPlus.Store.Chat.get(fullId);
+                if (!chat) {
+                    const contact = window.WAPlus.Store.Contact.get(fullId);
+                    if (contact) {
+                        try { chat = await window.WAPlus.Store.Chat.find(fullId); } 
+                        catch(e) { chat = contact; }
+                    }
+                }
+                
+                if (chat) {
+                    await window.WAPlus.sendTextMsgToChat(chat, text);
+                    console.log('[WA Plus] ⚡ Mensagem de Segundo Plano enviada com sucesso para', fullId);
+                    window.postMessage({ from: 'WAPlusInjected', action: 'MESSAGE_SENT_RESULT', result: true, msgId }, '*');
+                } else {
+                    console.log('[WA Plus] Falha em cache Segundo Plano para', fullId);
+                    window.postMessage({ from: 'WAPlusInjected', action: 'MESSAGE_SENT_RESULT', result: false, msgId }, '*');
+                }
+            } catch (e) {
+                console.error('[WA Plus] Exceção Webpack no envio background:', e);
+                window.postMessage({ from: 'WAPlusInjected', action: 'MESSAGE_SENT_RESULT', result: false, msgId }, '*');
+            }
+        }
+    });
+`;
+(document.head || document.documentElement).appendChild(injectScript);
