@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Meu WA Web Plus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Extensão para WhatsApp Web",
   "permissions": [
     "storage",
@@ -20,6 +20,10 @@
     "js": ["content.js"],
     "css": ["styles.css"],
     "run_at": "document_end"
+  }],
+  "web_accessible_resources": [{
+    "resources": ["sender.js"],
+    "matches": ["https://web.whatsapp.com/*"]
   }],
   "action": {
     "default_icon": {

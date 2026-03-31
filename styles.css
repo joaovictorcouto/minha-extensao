@@ -1214,4 +1214,53 @@
 .waplus-autocomplete-list li:hover {
   background: #3b4a54;
   color: #00a884;
-}
+}
+
+/* ========================================
+   CAMPO DE NÚMERO (abaixo do autocomplete)
+   ======================================== */
+
+/* Destaque visual quando número está validado */
+#waplus-schedule-phone {
+  transition: border-color 0.2s;
+  letter-spacing: 0.5px;
+}
+
+/* Campo de número em modo somente-leitura visual (quando preenchido pelo autocomplete) */
+#waplus-phone-group {
+  margin-top: -8px !important; /* aproxima dos campos acima */
+}
+
+/* ========================================
+   CARD DE MENSAGEM — NÚMERO INLINE
+   ======================================== */
+
+/* Badge de número exibido no card, ao lado do nome */
+.waplus-msg-card-phone {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 400;
+  color: #8696a0;
+  background: #2a3942;
+  padding: 1px 5px;
+  border-radius: 999px;
+  vertical-align: middle;
+  letter-spacing: 0.3px;
+}
+
+/* Card com status de falha */
+.waplus-msg-card.failed {
+  border-left-color: #ef4444;
+}
+
+/* Nome no card agora é flexível para acomodar o badge de número */
+.waplus-msg-card-contact {
+  font-weight: 600;
+  color: #e9edef;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
